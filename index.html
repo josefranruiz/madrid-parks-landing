@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madrid Parks - Real-time Park Information App</title>
+    <meta name="description" content="Discover Madrid's parks in real-time! Get live status updates, weather conditions, pollen levels, and opening hours. Plan your outdoor activities with confidence using official city data.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 60px 0;
+        }
+
+        .app-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .app-subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .app-badges {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .feature-description {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .screenshots {
+            margin: 40px 0;
+        }
+
+        .screenshots h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            font-size: 2rem;
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .screenshot {
+            background: #f8f9fa;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot:hover {
+            transform: scale(1.05);
+        }
+
+        .screenshot img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .screenshot-caption {
+            padding: 15px;
+            text-align: center;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .tech-stack {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 40px 0;
+        }
+
+        .tech-stack h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        .tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .tech-item {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid #667eea;
+            color: #667eea;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 40px 0;
+            opacity: 0.8;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 2.5rem;
+            }
+            
+            .app-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+                margin: 20px 0;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .screenshot-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="app-title">🌳 Madrid Parks</h1>
+            <p class="app-subtitle">Real-time park information and outdoor activity planning</p>
+            <div class="app-badges">
+                <span class="badge">🌍 7 Languages</span>
+                <span class="badge">📱 iOS & Android</span>
+                <span class="badge">⚡ Real-time Data</span>
+                <span class="badge">🌤️ Weather & Pollen</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50; font-size: 2rem;">
+                Plan Your Outdoor Adventures with Confidence
+            </h2>
+            
+            <p style="text-align: center; font-size: 1.2rem; color: #666; margin-bottom: 40px;">
+                Madrid Parks provides comprehensive real-time information about Madrid's parks, including operational status, 
+                weather conditions, pollen levels, and opening hours. Make informed decisions about your outdoor activities 
+                using official city data.
+            </p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3 class="feature-title">Real-time Status Updates</h3>
+                    <p class="feature-description">
+                        Get live updates on park operational status including open/closed states, alerts, and temporary closures 
+                        from Madrid's official API.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌤️</div>
+                    <h3 class="feature-title">Weather Integration</h3>
+                    <p class="feature-description">
+                        Access current temperature, humidity, wind conditions, precipitation, and solar radiation data 
+                        to plan your outdoor activities perfectly.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌸</div>
+                    <h3 class="feature-title">Pollen Tracking</h3>
+                    <p class="feature-description">
+                        Monitor pollen levels by type (trees, grasses, herbs) and species to avoid allergy triggers 
+                        and plan your park visits accordingly.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h3 class="feature-title">Interactive Maps</h3>
+                    <p class="feature-description">
+                        Navigate parks with detailed maps showing amenities, fountains, bathrooms, and points of interest 
+                        to enhance your outdoor experience.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3 class="feature-title">Multilingual Support</h3>
+                    <p class="feature-description">
+                        Available in 7 languages: Spanish, English, Greek, Italian, German, French, and more. 
+                        Perfect for international visitors and residents.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Offline Functionality</h3>
+                    <p class="feature-description">
+                        Works offline with cached data, ensuring you always have access to essential park information 
+                        even without an internet connection.
+                    </p>
+                </div>
+            </div>
+
+            <div class="screenshots">
+                <h2>App Screenshots</h2>
+                <div class="screenshot-grid">
+                    <div class="screenshot">
+                        <img src="assets/screenshot-main.png" alt="Main app interface showing park list and weather information">
+                        <div class="screenshot-caption">Main Interface</div>
+                    </div>
+                    <div class="screenshot">
+                        <img src="assets/screenshot-settings.png" alt="Settings screen with performance, appearance, and accessibility options">
+                        <div class="screenshot-caption">Settings & Preferences</div>
+                    </div>
+                    <div class="screenshot">
+                        <img src="assets/screenshot-map.png" alt="Interactive map showing park amenities and points of interest">
+                        <div class="screenshot-caption">Interactive Map View</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tech-stack">
+                <h2>Built with Modern Technologies</h2>
+                <div class="tech-list">
+                    <span class="tech-item">React Native</span>
+                    <span class="tech-item">TypeScript</span>
+                    <span class="tech-item">Expo SDK 53</span>
+                    <span class="tech-item">Real-time APIs</span>
+                    <span class="tech-item">Offline Storage</span>
+                    <span class="tech-item">Multilingual</span>
+                    <span class="tech-item">Accessibility</span>
+                    <span class="tech-item">Dark Mode</span>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <h2 style="margin-bottom: 30px; color: #2c3e50;">Ready to Explore Madrid's Parks?</h2>
+                <a href="#" class="cta-button">Download on App Store</a>
+                <p style="margin-top: 20px; color: #666; font-size: 0.9rem;">
+                    Coming soon to iOS and Android
+                </p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Madrid Parks App. Built with ❤️ for the Madrid community.</p>
+            <div class="footer-links">
+                <a href="https://github.com/josefranruiz/madrid-parks-landing">GitHub</a>
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
