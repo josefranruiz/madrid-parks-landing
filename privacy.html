@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Madrid Parks App</title>
+    <meta name="description" content="Privacy Policy for Madrid Parks mobile application - Learn how we handle your data and protect your privacy.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Madrid Parks App Color Palette */
+            --background: #F2F2F7;
+            --surface: #FFFFFF;
+            --card: #FFFFFF;
+            --primaryText: #000000;
+            --secondaryText: #8E8E93;
+            --tertiaryText: #C7C7CC;
+            --tint: #007AFF;
+            --statusNormal: #34C759;
+            --statusWarning: #FF9500;
+            --statusAlert: #FF3B30;
+            --border: #C6C6C8;
+            --separator: #C6C6C8;
+            --buttonPrimary: #dce3eb;
+            --buttonSecondary: #e3ede5;
+            --buttonText: #2c3e50;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --overlay: rgba(0, 0, 0, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #000000;
+                --surface: #1C1C1E;
+                --card: #2C2C2E;
+                --primaryText: #FFFFFF;
+                --secondaryText: #8E8E93;
+                --tertiaryText: #48484A;
+                --tint: #0A84FF;
+                --statusNormal: #30D158;
+                --statusWarning: #FF9F0A;
+                --statusAlert: #FF453A;
+                --border: #38383A;
+                --separator: #38383A;
+                --buttonPrimary: #2C2C2E;
+                --buttonSecondary: #2C2C2E;
+                --buttonText: #FFFFFF;
+                --shadow: rgba(0, 0, 0, 0.3);
+                --overlay: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--primaryText);
+            background: var(--background);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: var(--primaryText);
+            padding: 40px 0;
+            background: var(--surface);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--tint) 0%, var(--statusNormal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: var(--secondaryText);
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: var(--tint);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .back-button:hover {
+            background: var(--statusNormal);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section h2 {
+            color: var(--primaryText);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--tint);
+        }
+
+        .section h3 {
+            color: var(--primaryText);
+            font-size: 1.2rem;
+            margin: 25px 0 15px 0;
+        }
+
+        .section p {
+            color: var(--secondaryText);
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+
+        .section ul {
+            color: var(--secondaryText);
+            margin: 15px 0 15px 20px;
+            line-height: 1.7;
+        }
+
+        .section li {
+            margin-bottom: 8px;
+        }
+
+        .highlight-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid var(--statusNormal);
+        }
+
+        .highlight-box h4 {
+            color: var(--primaryText);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .highlight-box p {
+            color: var(--secondaryText);
+            margin-bottom: 0;
+        }
+
+        .contact-info {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .contact-info h4 {
+            color: var(--primaryText);
+            margin-bottom: 15px;
+        }
+
+        .contact-info a {
+            color: var(--tint);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-info a:hover {
+            color: var(--statusNormal);
+        }
+
+        .last-updated {
+            text-align: center;
+            color: var(--tertiaryText);
+            font-size: 0.9rem;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        footer {
+            text-align: center;
+            color: var(--secondaryText);
+            padding: 30px 0;
+            background: var(--surface);
+            border-radius: 20px;
+            margin-top: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .footer-links {
+            margin-top: 15px;
+        }
+
+        .footer-links a {
+            color: var(--tint);
+            text-decoration: none;
+            margin: 0 15px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--statusNormal);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .main-content {
+                padding: 25px;
+                margin: 20px 0;
+            }
+            
+            .app-title {
+                font-size: 2rem;
+            }
+            
+            .section h2 {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Focus styles for accessibility */
+        button:focus,
+        a:focus {
+            outline: 2px solid var(--tint);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="app-title">🌳 Madrid Parks</h1>
+            <p class="page-subtitle">Privacy Policy</p>
+            <a href="index.html" class="back-button">← Back to Landing Page</a>
+        </header>
+
+        <div class="main-content">
+            <div class="section">
+                <h2>Privacy Policy</h2>
+                <p>This Privacy Policy describes how Madrid Parks ("we," "our," or "us") collects, uses, and protects your information when you use our mobile application.</p>
+                
+                <div class="highlight-box">
+                    <h4>🔒 Your Privacy Matters</h4>
+                    <p>Madrid Parks is designed with privacy in mind. We collect minimal data and use it only to provide you with the best possible experience.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Information We Collect</h2>
+                
+                <h3>Location Data</h3>
+                <p>Madrid Parks requests access to your device's location to:</p>
+                <ul>
+                    <li>Show nearby parks and calculate distances</li>
+                    <li>Provide relevant weather and pollen information for your area</li>
+                    <li>Display parks in order of proximity to you</li>
+                </ul>
+                <p><strong>Important:</strong> Your location data is processed locally on your device and is never transmitted to our servers or shared with third parties.</p>
+
+                <h3>App Usage Data</h3>
+                <p>We may collect anonymous, aggregated usage statistics to improve the app's performance and user experience. This data does not identify you personally.</p>
+
+                <h3>No Personal Information</h3>
+                <p>Madrid Parks does not collect, store, or transmit:</p>
+                <ul>
+                    <li>Personal identification information (name, email, phone number)</li>
+                    <li>User accounts or profiles</li>
+                    <li>Payment information</li>
+                    <li>Social media data</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>How We Use Your Information</h2>
+                <p>The information we collect is used exclusively to:</p>
+                <ul>
+                    <li>Provide real-time park status information</li>
+                    <li>Display weather and environmental data for your location</li>
+                    <li>Show pollen levels and allergy information</li>
+                    <li>Improve app functionality and user experience</li>
+                    <li>Ensure app stability and performance</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Data Sharing and Third Parties</h2>
+                <p><strong>We do not sell, trade, or otherwise transfer your information to third parties.</strong></p>
+                
+                <h3>Data Sources</h3>
+                <p>Madrid Parks integrates with public data sources:</p>
+                <ul>
+                    <li><strong>Madrid City Council Open Data:</strong> Park status, alerts, and operational information</li>
+                    <li><strong>Madrid Regional Government:</strong> Weather data and pollen information</li>
+                    <li><strong>Public APIs:</strong> All data sources are publicly available and do not require authentication</li>
+                </ul>
+                
+                <p>These integrations provide real-time information but do not involve sharing your personal data.</p>
+            </div>
+
+            <div class="section">
+                <h2>Data Storage and Security</h2>
+                
+                <h3>Local Storage</h3>
+                <p>Your app preferences and cached data are stored locally on your device using secure storage methods provided by your operating system.</p>
+                
+                <h3>Offline Functionality</h3>
+                <p>Madrid Parks works offline and stores essential information locally to ensure you always have access to park data, even without an internet connection.</p>
+                
+                <h3>Data Security</h3>
+                <p>We implement appropriate security measures to protect any information processed by the app, following industry best practices for mobile application security.</p>
+            </div>
+
+            <div class="section">
+                <h2>Your Rights and Choices</h2>
+                
+                <h3>Location Permissions</h3>
+                <p>You can control location access through your device settings:</p>
+                <ul>
+                    <li>Grant or revoke location permissions at any time</li>
+                    <li>Choose between "While Using App" or "Always" permission</li>
+                    <li>Disable location services completely</li>
+                </ul>
+                
+                <h3>Data Deletion</h3>
+                <p>Since we don't store personal data on our servers, simply uninstalling the app removes all locally stored information.</p>
+                
+                <h3>Opt-Out</h3>
+                <p>You can opt out of anonymous usage statistics collection through the app's settings menu.</p>
+            </div>
+
+            <div class="section">
+                <h2>Children's Privacy</h2>
+                <p>Madrid Parks is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately.</p>
+            </div>
+
+            <div class="section">
+                <h2>Changes to This Privacy Policy</h2>
+                <p>We may update this Privacy Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will notify you of any material changes by posting the new Privacy Policy in the app and updating the "Last Updated" date.</p>
+                
+                <p>Your continued use of Madrid Parks after any changes indicates your acceptance of the updated Privacy Policy.</p>
+            </div>
+
+            <div class="section">
+                <h2>International Users</h2>
+                <p>Madrid Parks is designed for use in Madrid, Spain. If you use the app from outside the European Union, please note that your information may be transferred to and processed in countries with different data protection laws.</p>
+            </div>
+
+            <div class="contact-info">
+                <h4>Questions About This Privacy Policy?</h4>
+                <p>If you have any questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
+                <p><a href="https://github.com/josefranruiz/madrid-parks-landing">GitHub Repository</a></p>
+            </div>
+
+            <div class="last-updated">
+                <p>Last Updated: August 22, 2025</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Madrid Parks App. Built with ❤️ for the Madrid community.</p>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="https://github.com/josefranruiz/madrid-parks-landing">GitHub</a>
+                <a href="#privacy">Privacy Policy</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
