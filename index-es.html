@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Madrid Parks - Real-time Park Information App</title>
+    <title>Madrid Parks - Aplicación de Información de Parques en Tiempo Real</title>
     <meta name="description" content="Discover Madrid's parks in real-time! Get live status updates, weather conditions, pollen levels, and opening hours. Plan your outdoor activities with confidence using official city data.">
     
     <style>
@@ -293,7 +293,7 @@
             <div class="language-selector">
                 <select id="languageSelect" onchange="changeLanguage(this.value)">
                     <option value="en">🇺🇸 English</option>
-                    <option value="es">🇪🇸 Español</option>
+                    <option value="en">🇺🇸 English</option>
                 </select>
             </div>
             <h1 class="hero-title" data-key="hero-title">Madrid Parks</h1>
@@ -354,15 +354,15 @@
             <h2 data-key="screenshots-title">App Screenshots</h2>
             <div class="screenshot-grid">
                 <div class="screenshot">
-                    <img src="assets/screenshot-main.png" alt="Main app interface showing park list and weather information">
+                    <img src="assets/screenshot-1-es.png" alt="Main app interface showing park list and weather information">
                     <div class="screenshot-caption" data-key="screenshot-1">Main Interface</div>
                 </div>
                 <div class="screenshot">
-                    <img src="assets/screenshot-settings.png" alt="Settings screen with performance, appearance, and accessibility options">
+                    <img src="assets/screenshot-2-es.png" alt="Settings screen with performance, appearance, and accessibility options">
                     <div class="screenshot-caption" data-key="screenshot-2">Settings & Preferences</div>
                 </div>
                 <div class="screenshot">
-                    <img src="assets/screenshot-map.png" alt="Interactive map showing park amenities and points of interest">
+                    <img src="assets/screenshot-3-es.png" alt="Interactive map showing park amenities and points of interest">
                     <div class="screenshot-caption" data-key="screenshot-3">Interactive Map View</div>
                 </div>
             </div>
@@ -394,7 +394,7 @@
             <p>&copy; 2025 Madrid Parks App. Built with ❤️ for the Madrid community.</p>
             <div class="footer-links">
             <div class="language-switcher" style="text-align: center; margin: 20px 0;">
-                <a href="index-es.html" style="color: var(--tint); text-decoration: none; font-weight: 600;">🇪🇸 Ver en Español</a>
+                <a href="index.html" style="color: var(--tint); text-decoration: none; font-weight: 600;">🇺🇸 Ver en Inglés</a>
             </div>
                 <a href="https://github.com/josefranruiz/madrid-parks-landing">GitHub</a>
                 <a href="privacy.html">Privacy Policy</a>
@@ -476,7 +476,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const storedLang = localStorage.getItem('preferredLanguage');
             const browserLang = navigator.language.split('-')[0];
-            const initialLang = storedLang || (translations[browserLang] ? browserLang : 'en');
+            const initialLang = storedLang || (translations[browserLang] ? browserLang : 'es');
             
             // Set the selector to the initial language
             document.getElementById('languageSelect').value = initialLang;
