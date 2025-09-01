@@ -293,7 +293,7 @@
             <div class="language-selector">
                 <select id="languageSelect" onchange="changeLanguage(this.value)">
                     <option value="en">🇺🇸 English</option>
-                    <option value="en">🇺🇸 English</option>
+                    <option value="es">🇪🇸 Español</option>
                 </select>
             </div>
             <h1 class="hero-title" data-key="hero-title">Madrid Parks</h1>
@@ -394,7 +394,7 @@
             <p>&copy; 2025 Madrid Parks App. Built with ❤️ for the Madrid community.</p>
             <div class="footer-links">
             <div class="language-switcher" style="text-align: center; margin: 20px 0;">
-                <a href="index.html" style="color: var(--tint); text-decoration: none; font-weight: 600;">🇺🇸 Ver en Inglés</a>
+                <a href="index-es.html" style="color: var(--tint); text-decoration: none; font-weight: 600;">🇪🇸 Ver en Español</a>
             </div>
                 <a href="https://github.com/josefranruiz/madrid-parks-landing">GitHub</a>
                 <a href="privacy.html">Privacy Policy</a>
@@ -476,7 +476,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const storedLang = localStorage.getItem('preferredLanguage');
             const browserLang = navigator.language.split('-')[0];
-            const initialLang = storedLang || (translations[browserLang] ? browserLang : 'es');
+            const initialLang = storedLang || (translations[browserLang] ? browserLang : 'en');
             
             // Set the selector to the initial language
             document.getElementById('languageSelect').value = initialLang;
