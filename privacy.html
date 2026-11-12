@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Madrid Parks App</title>
+    <meta name="description" content="Privacy Policy for Madrid Parks mobile application - Learn how we handle your data and protect your privacy.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #F2F2F7;
+            --surface: #FFFFFF;
+            --card: #FFFFFF;
+            --primaryText: #000000;
+            --secondaryText: #8E8E93;
+            --tint: #007AFF;
+            --statusNormal: #34C759;
+            --border: #C6C6C8;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #000000;
+                --surface: #1C1C1E;
+                --card: #2C2C2E;
+                --primaryText: #FFFFFF;
+                --secondaryText: #8E8E93;
+                --tint: #0A84FF;
+                --statusNormal: #30D158;
+                --border: #38383A;
+                --shadow: rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--primaryText);
+            background: var(--background);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .language-selector select {
+            background: var(--card);
+            color: var(--primaryText);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        header {
+            text-align: center;
+            color: var(--primaryText);
+            padding: 40px 0;
+            background: var(--surface);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--tint) 0%, var(--statusNormal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: var(--secondaryText);
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: var(--tint);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: var(--statusNormal);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: var(--primaryText);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--tint);
+        }
+
+        .section h3 {
+            color: var(--primaryText);
+            font-size: 1.2rem;
+            margin: 25px 0 15px 0;
+        }
+
+        .section p, .section ul {
+            color: var(--secondaryText);
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+
+        .section li {
+            margin-bottom: 8px;
+        }
+
+        .highlight-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid var(--statusNormal);
+        }
+
+        .highlight-box h4 {
+            color: var(--primaryText);
+            margin-bottom: 10px;
+        }
+
+        .contact-info {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .contact-info a {
+            color: var(--tint);
+            text-decoration: none;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--secondaryText);
+            padding: 30px 0;
+            background: var(--surface);
+            border-radius: 20px;
+            margin-top: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .footer-links a {
+            color: var(--tint);
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        @media (max-width: 768px) {
+            .language-selector {
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="en">🇺🇸 English</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="el">🇬🇷 Ελληνικά</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="fr">🇫🇷 Français</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1 class="app-title">🌳 Madrid Parks</h1>
+            <p class="page-subtitle" data-key="privacy-policy">Privacy Policy</p>
+            <a href="index.html" class="back-button" data-key="back-button">← Back to Landing Page</a>
+        </header>
+
+        <div class="main-content">
+            <div class="section">
+                <h2 data-key="privacy-title">Privacy Policy</h2>
+                <p data-key="privacy-intro">This Privacy Policy describes how Madrid Parks ("we," "our," or "us") collects, uses, and protects your information when you use our mobile application.</p>
+                
+                <div class="highlight-box">
+                    <h4 data-key="privacy-highlight-title">🔒 Your Privacy Matters</h4>
+                    <p data-key="privacy-highlight-desc">Madrid Parks is designed with privacy in mind. We collect minimal data and use it only to provide you with the best possible experience.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 data-key="info-collection-title">Information We Collect</h2>
+                
+                <h3 data-key="location-title">Location Data</h3>
+                <p data-key="location-desc">Madrid Parks requests access to your device's location to show nearby parks, calculate distances, and provide relevant weather and pollen information for your area.</p>
+                <p><strong data-key="location-important">Important:</strong> <span data-key="location-local">Your location data is processed locally on your device and is never transmitted to our servers or shared with third parties.</span></p>
+
+                <h3 data-key="usage-title">App Usage Data</h3>
+                <p data-key="usage-desc">We may collect anonymous, aggregated usage statistics to improve the app's performance and user experience. This data does not identify you personally.</p>
+
+                <h3 data-key="no-personal-title">No Personal Information</h3>
+                <p data-key="no-personal-desc">Madrid Parks does not collect, store, or transmit personal identification information, user accounts, payment information, or social media data.</p>
+            </div>
+
+            <div class="section">
+                <h2 data-key="data-usage-title">How We Use Your Information</h2>
+                <p data-key="data-usage-desc">The information we collect is used exclusively to provide real-time park status information, display weather and environmental data, show pollen levels, improve app functionality, and ensure app stability.</p>
+            </div>
+
+            <div class="section">
+                <h2 data-key="data-sharing-title">Data Sharing and Third Parties</h2>
+                <p><strong data-key="no-sharing">We do not sell, trade, or otherwise transfer your information to third parties.</strong></p>
+                
+                <h3 data-key="data-sources-title">Data Sources</h3>
+                <p data-key="data-sources-desc">Madrid Parks integrates with public data sources from Madrid City Council and Regional Government. All data sources are publicly available and do not require authentication.</p>
+            </div>
+
+            <div class="section">
+                <h2 data-key="storage-title">Data Storage and Security</h2>
+                <p data-key="storage-local">Your app preferences and cached data are stored locally on your device using secure storage methods provided by your operating system.</p>
+                <p data-key="storage-offline">Madrid Parks works offline and stores essential information locally to ensure you always have access to park data, even without an internet connection.</p>
+            </div>
+
+            <div class="section">
+                <h2 data-key="rights-title">Your Rights and Choices</h2>
+                <p data-key="rights-location">You can control location access through your device settings, grant or revoke permissions at any time, and disable location services completely.</p>
+                <p data-key="rights-deletion">Since we don't store personal data on our servers, simply uninstalling the app removes all locally stored information.</p>
+            </div>
+
+            <div class="section">
+                <h2 data-key="children-title">Children's Privacy</h2>
+                <p data-key="children-desc">Madrid Parks is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.</p>
+            </div>
+
+            <div class="section">
+                <h2 data-key="changes-title">Changes to This Privacy Policy</h2>
+                <p data-key="changes-desc">We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy in the app and updating the "Last Updated" date.</p>
+            </div>
+
+            <div class="contact-info">
+                <h4 data-key="contact-title">Questions About This Privacy Policy?</h4>
+                <p data-key="contact-desc">If you have any questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
+                <p><a href="https://github.com/josefranruiz/madrid-parks-landing">GitHub Repository</a></p>
+            </div>
+
+            <div class="section">
+                <p style="text-align: center; color: var(--secondaryText); font-size: 0.9rem;" data-key="last-updated">Last Updated: August 22, 2025</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Madrid Parks App. Built with ❤️ for the Madrid community.</p>
+            <div class="footer-links">
+                <a href="index.html" data-key="footer-home">Home</a>
+                <a href="https://github.com/josefranruiz/madrid-parks-landing">GitHub</a>
+                <a href="#privacy" data-key="footer-privacy">Privacy Policy</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                "privacy-policy": "Privacy Policy",
+                "back-button": "← Back to Landing Page",
+                "privacy-title": "Privacy Policy",
+                "privacy-intro": "This Privacy Policy describes how Madrid Parks (\"we,\" \"our,\" or \"us\") collects, uses, and protects your information when you use our mobile application.",
+                "privacy-highlight-title": "🔒 Your Privacy Matters",
+                "privacy-highlight-desc": "Madrid Parks is designed with privacy in mind. We collect minimal data and use it only to provide you with the best possible experience.",
+                "info-collection-title": "Information We Collect",
+                "location-title": "Location Data",
+                "location-desc": "Madrid Parks requests access to your device's location to show nearby parks, calculate distances, and provide relevant weather and pollen information for your area.",
+                "location-important": "Important:",
+                "location-local": "Your location data is processed locally on your device and is never transmitted to our servers or shared with third parties.",
+                "usage-title": "App Usage Data",
+                "usage-desc": "We may collect anonymous, aggregated usage statistics to improve the app's performance and user experience. This data does not identify you personally.",
+                "no-personal-title": "No Personal Information",
+                "no-personal-desc": "Madrid Parks does not collect, store, or transmit personal identification information, user accounts, payment information, or social media data.",
+                "data-usage-title": "How We Use Your Information",
+                "data-usage-desc": "The information we collect is used exclusively to provide real-time park status information, display weather and environmental data, show pollen levels, improve app functionality, and ensure app stability.",
+                "data-sharing-title": "Data Sharing and Third Parties",
+                "no-sharing": "We do not sell, trade, or otherwise transfer your information to third parties.",
+                "data-sources-title": "Data Sources",
+                "data-sources-desc": "Madrid Parks integrates with public data sources from Madrid City Council and Regional Government. All data sources are publicly available and do not require authentication.",
+                "storage-title": "Data Storage and Security",
+                "storage-local": "Your app preferences and cached data are stored locally on your device using secure storage methods provided by your operating system.",
+                "storage-offline": "Madrid Parks works offline and stores essential information locally to ensure you always have access to park data, even without an internet connection.",
+                "rights-title": "Your Rights and Choices",
+                "rights-location": "You can control location access through your device settings, grant or revoke permissions at any time, and disable location services completely.",
+                "rights-deletion": "Since we don't store personal data on our servers, simply uninstalling the app removes all locally stored information.",
+                "children-title": "Children's Privacy",
+                "children-desc": "Madrid Parks is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.",
+                "changes-title": "Changes to This Privacy Policy",
+                "changes-desc": "We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy in the app and updating the \"Last Updated\" date.",
+                "contact-title": "Questions About This Privacy Policy?",
+                "contact-desc": "If you have any questions or concerns about this Privacy Policy or our data practices, please contact us:",
+                "last-updated": "Last Updated: August 22, 2025",
+                "footer-home": "Home",
+                "footer-privacy": "Privacy Policy"
+            },
+            es: {
+                "privacy-policy": "Política de Privacidad",
+                "back-button": "← Volver a la Página Principal",
+                "privacy-title": "Política de Privacidad",
+                "privacy-intro": "Esta Política de Privacidad describe cómo Madrid Parks (\"nosotros,\" \"nuestro,\" o \"nos\") recopila, usa y protege su información cuando utiliza nuestra aplicación móvil.",
+                "privacy-highlight-title": "🔒 Su Privacidad es Importante",
+                "privacy-highlight-desc": "Madrid Parks está diseñado pensando en la privacidad. Recopilamos datos mínimos y los usamos solo para brindarle la mejor experiencia posible.",
+                "info-collection-title": "Información que Recopilamos",
+                "location-title": "Datos de Ubicación",
+                "location-desc": "Madrid Parks solicita acceso a la ubicación de su dispositivo para mostrar parques cercanos, calcular distancias y proporcionar información meteorológica y de polen relevante para su área.",
+                "location-important": "Importante:",
+                "location-local": "Sus datos de ubicación se procesan localmente en su dispositivo y nunca se transmiten a nuestros servidores ni se comparten con terceros.",
+                "usage-title": "Datos de Uso de la App",
+                "usage-desc": "Podemos recopilar estadísticas de uso anónimas y agregadas para mejorar el rendimiento y la experiencia del usuario de la aplicación. Estos datos no lo identifican personalmente.",
+                "no-personal-title": "Sin Información Personal",
+                "no-personal-desc": "Madrid Parks no recopila, almacena ni transmite información de identificación personal, cuentas de usuario, información de pago o datos de redes sociales.",
+                "data-usage-title": "Cómo Usamos su Información",
+                "data-usage-desc": "La información que recopilamos se usa exclusivamente para proporcionar información de estado de parques en tiempo real, mostrar datos meteorológicos y ambientales, mostrar niveles de polen, mejorar la funcionalidad de la aplicación y asegurar la estabilidad de la aplicación.",
+                "data-sharing-title": "Compartir Datos y Terceros",
+                "no-sharing": "No vendemos, intercambiamos ni transferimos su información a terceros.",
+                "data-sources-title": "Fuentes de Datos",
+                "data-sources-desc": "Madrid Parks se integra con fuentes de datos públicas del Ayuntamiento de Madrid y el Gobierno Regional. Todas las fuentes de datos son públicas y no requieren autenticación.",
+                "storage-title": "Almacenamiento y Seguridad de Datos",
+                "storage-local": "Sus preferencias de aplicación y datos en caché se almacenan localmente en su dispositivo usando métodos de almacenamiento seguros proporcionados por su sistema operativo.",
+                "storage-offline": "Madrid Parks funciona sin conexión y almacena información esencial localmente para asegurar que siempre tenga acceso a datos de parques, incluso sin conexión a internet.",
+                "rights-title": "Sus Derechos y Opciones",
+                "rights-location": "Puede controlar el acceso a la ubicación a través de la configuración de su dispositivo, otorgar o revocar permisos en cualquier momento, y desactivar los servicios de ubicación completamente.",
+                "rights-deletion": "Como no almacenamos datos personales en nuestros servidores, simplemente desinstalar la aplicación elimina toda la información almacenada localmente.",
+                "children-title": "Privacidad de Menores",
+                "children-desc": "Madrid Parks no está destinado a menores de 13 años. No recopilamos conscientemente información personal de menores de 13 años.",
+                "changes-title": "Cambios en esta Política de Privacidad",
+                "changes-desc": "Podemos actualizar esta Política de Privacidad de vez en cuando. Le notificaremos cualquier cambio material publicando la nueva Política de Privacidad en la aplicación y actualizando la fecha de \"Última Actualización\".",
+                "contact-title": "¿Preguntas sobre esta Política de Privacidad?",
+                "contact-desc": "Si tiene preguntas o inquietudes sobre esta Política de Privacidad o nuestras prácticas de datos, contáctenos:",
+                "last-updated": "Última Actualización: 22 de Agosto de 2025",
+                "footer-home": "Inicio",
+                "footer-privacy": "Política de Privacidad"
+            }
+        };
+
+        function changeLanguage(lang) {
+            const elements = document.querySelectorAll('[data-key]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            document.documentElement.lang = lang;
+            localStorage.setItem('preferredLanguage', lang);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedLang = localStorage.getItem('preferredLanguage');
+            const browserLang = navigator.language.split('-')[0];
+            const initialLang = storedLang || (translations[browserLang] ? browserLang : 'en');
+            
+            document.getElementById('languageSelect').value = initialLang;
+            changeLanguage(initialLang);
+        });
+    </script>
+</body>
+</html>
