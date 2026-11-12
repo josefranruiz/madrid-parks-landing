@@ -109,8 +109,6 @@ h1{
   margin-top:18px;max-width:17ch;text-wrap:balance;
 }
 h1 em{font-style:italic;color:var(--tone)}
-h1 .who{display:block;font-size:.5em;line-height:1.14;letter-spacing:-.012em;margin-bottom:.22em;max-width:26ch}
-.hero.solo h1{max-width:none}
 .sub{margin-top:18px;font-size:clamp(1rem,1.6vw,1.14rem);color:var(--ink-2);max-width:54ch;text-wrap:pretty}
 .sub b{font-weight:600;color:var(--ink)}
 .link{color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;border-radius:4px}
@@ -136,6 +134,9 @@ h1 .who{display:block;font-size:.5em;line-height:1.14;letter-spacing:-.012em;mar
   transition:border-color .2s,box-shadow .2s,scale .2s var(--ease);
 }
 .tile.unknown{--tone:var(--none)}
+/* Cerrado por horario no es una alarma: es de noche. Se apaga, no se enciende. */
+.tile.rest{--tone:var(--none);background:color-mix(in srgb,var(--surface) 45%,var(--bg))}
+.tile.rest .state i{width:10px;height:10px;margin:0 2px;background:transparent;box-shadow:inset 0 0 0 2px currentColor}
 .tile.major{--tag:var(--major)}
 /* Con el orden en manos del usuario, un cierre ya no sube solo: lo carga el color. */
 .tile.shut{--tone:var(--shut);--tag:var(--shut);background:color-mix(in srgb,var(--shut) 8%,var(--surface));border-color:color-mix(in srgb,var(--shut) 36%,var(--line))}
@@ -151,15 +152,19 @@ h1 .who{display:block;font-size:.5em;line-height:1.14;letter-spacing:-.012em;mar
 .dotsep{color:var(--ink-3);margin:0 .4em}
 .nb{white-space:nowrap}
 
-.star{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--ink-3);transition:color .15s,opacity .15s,background-color .15s}
+.acts{display:flex}
+.act{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--ink-3);transition:color .15s,opacity .15s,background-color .15s}
+.act svg{width:17px;height:17px}
+.act:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.act.done{color:var(--open)}
 .star:hover{color:var(--star);background:color-mix(in srgb,var(--star) 12%,transparent)}
 .star[aria-pressed="true"]{color:var(--star)}
 .star[aria-pressed="true"] svg{fill:currentColor}
 @media (hover:hover) and (pointer:fine){
   .tile{cursor:grab}
   .tile:hover{border-color:color-mix(in srgb,var(--tone) 30%,var(--ink-3));box-shadow:var(--lift)}
-  .tile .star{opacity:0}
-  .tile:hover .star,.tile .star:focus-visible,.tile .star[aria-pressed="true"]{opacity:1}
+  .tile .act{opacity:0}
+  .tile:hover .act,.tile .act:focus-visible,.tile .act.done,.tile .star[aria-pressed="true"]{opacity:1}
 }
 .tile.dragging{z-index:2;scale:1.03;box-shadow:var(--lift);border-color:var(--accent)}
 .sorting,.sorting *{cursor:grabbing!important;user-select:none;-webkit-user-select:none}
@@ -244,6 +249,7 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
   <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
   <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
 </svg>
 
@@ -267,7 +273,7 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
 
     <div class="tools">
       <button type="button" class="refresh" id="refresh"><svg class="i"><use href="#i-refresh"/></svg><span id="stamp">Actualizar</span></button>
-      <button type="button" class="btn" id="open-editor"><svg class="i"><use href="#i-sliders"/></svg><span data-k="mine">Mis parques</span><span class="count" id="count" hidden></span></button>
+      <button type="button" class="btn" id="open-editor"><svg class="i"><use href="#i-sliders"/></svg><span id="mine-label">Mis parques</span><span class="count" id="count" hidden></span></button>
     </div>
 
     <p class="alertbar" id="alertbar" role="status" hidden></p>
@@ -324,8 +330,9 @@ const S={
  6:{open:false}
 };
 
+const alas=time=>(/^0?1:/.test(time)?'a la ':'a las ')+time;
 const T={
- es:{title:'Estado de los parques de Madrid',mine:'Mis parques',
+ es:{title:'Estado de los parques de Madrid',mine:'Mis parques',seeMine:'Ver mis parques',
   open:'Abierto',closed:'Cerrado',nodata:'Sin datos',
   warning:'Aviso',major:'Incidencia',alert:'Alerta',
   loading:'Consultando el parte…',
@@ -334,21 +341,29 @@ const T={
   warnHead:n=>`Todo abierto, <em>con ${n===1?'un aviso':n+' avisos'}.</em>`,
   warnSub:n=>`Se puede entrar en todos, pero ${n===1?'uno tiene':n+' tienen'} un aviso del Ayuntamiento.`,
   shutHead:n=>n===1?'Hay <em>un parque cerrado.</em>':`Hay <em>${n} parques cerrados.</em>`,
-  shutSub:(names,w)=>`Cerrado: <b>${names}</b>.`+(w?` ${w===1?'Otro':'Otros '+w} con aviso.`:''),
-  soloOpen:'Abierto.',soloWarn:'Abierto, con aviso.',soloShut:'Cerrado.',soloNone:'Sin datos.',
-  soloCalm:'Sin incidencias comunicadas por el Ayuntamiento.',
+  shutSub:(names,h,w)=>`Por decisión del Ayuntamiento: <b>${names}</b>.`
+    +(h?` ${h===1?'Otro, cerrado':'Otros '+h+', cerrados'} por horario.`:'')+(w?` ${w===1?'Uno':w} con aviso.`:''),
+  allHours:'Todo cerrado, <em>por horario.</em>',
+  firstOpen:(name,when)=>`El primero en abrir es <b>${name}</b>, ${when}.`,
+  mixHead:(o,w)=>`${o===1?'Uno abierto':o+' abiertos'}, <em>${w?'con '+(w===1?'un aviso':w+' avisos'):'sin incidencias'}.</em>`,
+  mixSub:(names,h)=>h<=3?`Cerrado por horario: <b>${names}</b>.`:`Los otros ${h} están cerrados por horario.`,
+  one:{open:'<em>Abierto.</em>',warn:'Abierto, <em>con un aviso.</em>',city:'<em>Cerrado.</em>',hours:'Cerrado <em>por horario.</em>',none:'<em>Sin datos.</em>'},
+  oneSub:name=>`Estás viendo solo <b>${name}</b>.`,
   noneHead:'Ningún parque <em>elegido.</em>',noneSub:'Elige qué parques quieres ver',
-  restricted:'Horario reducido',closedByCity:'Cerrado por el Ayuntamiento',
+  closes:time=>`Cierra ${alas(time)}`,opens:when=>`Abre ${when}`,
+  when:(off,time,day)=>off===0?alas(time):off===1?`mañana ${alas(time)}`:`el ${day} ${alas(time)}`,
+  window:'Horario del aviso',closedByCity:'Cerrado por el Ayuntamiento',
   refresh:'Actualizar',now:'Actualizado ahora',mins:n=>`Actualizado hace ${n} min`,hours:n=>`Actualizado hace ${n} h`,
   failed:'No se ha podido consultar al Ayuntamiento. Inténtalo de nuevo en un momento.',
   failedHead:'Sin respuesta <em>del Ayuntamiento.</em>',
-  fav:'Fijar arriba como favorito',unfav:'Quitar de favoritos',up:'Subir',down:'Bajar',show:'Mostrar',
+  fav:'Fijar arriba como favorito',unfav:'Quitar de favoritos',up:'Subir',down:'Bajar',
+  share:'Copiar el enlace de este parque',copied:'Enlace copiado',
   edHelp:'Elige cuáles ver y en qué orden. Los favoritos van siempre primero.',
   edDrag:' En la página también puedes arrastrar las fichas.',
   reset:'Restablecer',done:'Listo',close:'Cerrar',
-  footnote:'Datos del parte de alertas del Ayuntamiento de Madrid. «Abierto» significa que el Ayuntamiento no ha cerrado el parque; no tiene en cuenta el horario de cada recinto. La app sí.',
+  footnote:'Estado según el parte de alertas del Ayuntamiento de Madrid y el horario habitual de cada parque. El horario no recoge festivos ni cambios puntuales.',
   home:'Inicio',app:'App para iPhone',privacy:'Privacidad'},
- en:{title:'Madrid parks status',mine:'My parks',
+ en:{title:'Madrid parks status',mine:'My parks',seeMine:'See my parks',
   open:'Open',closed:'Closed',nodata:'No data',
   warning:'Notice',major:'Incident',alert:'Alert',
   loading:'Checking the report…',
@@ -357,19 +372,27 @@ const T={
   warnHead:n=>`All open, <em>with ${n===1?'one notice':n+' notices'}.</em>`,
   warnSub:n=>`You can go into all of them, but ${n===1?'one has':n+' have'} a notice from the city council.`,
   shutHead:n=>n===1?'<em>One park is closed.</em>':`<em>${n} parks are closed.</em>`,
-  shutSub:(names,w)=>`Closed: <b>${names}</b>.`+(w?` ${w} more with a notice.`:''),
-  soloOpen:'Open.',soloWarn:'Open, with a notice.',soloShut:'Closed.',soloNone:'No data.',
-  soloCalm:'Nothing reported by the city council.',
+  shutSub:(names,h,w)=>`Closed by the city council: <b>${names}</b>.`
+    +(h?` ${h} more closed outside opening hours.`:'')+(w?` ${w} with a notice.`:''),
+  allHours:'All closed, <em>outside opening hours.</em>',
+  firstOpen:(name,when)=>`First to open: <b>${name}</b>, ${when}.`,
+  mixHead:(o,w)=>`${o} open, <em>${w?'with '+(w===1?'one notice':w+' notices'):'nothing reported'}.</em>`,
+  mixSub:(names,h)=>h<=3?`Closed outside opening hours: <b>${names}</b>.`:`The other ${h} are closed outside opening hours.`,
+  one:{open:'<em>Open.</em>',warn:'Open, <em>with a notice.</em>',city:'<em>Closed.</em>',hours:'Closed, <em>outside opening hours.</em>',none:'<em>No data.</em>'},
+  oneSub:name=>`Showing only <b>${name}</b>.`,
   noneHead:'No parks <em>selected.</em>',noneSub:'Choose the parks you want to see',
-  restricted:'Reduced hours',closedByCity:'Closed by the city council',
+  closes:time=>`Closes at ${time}`,opens:when=>`Opens ${when}`,
+  when:(off,time,day)=>off===0?`at ${time}`:off===1?`tomorrow at ${time}`:`on ${day} at ${time}`,
+  window:'Notice in effect',closedByCity:'Closed by the city council',
   refresh:'Refresh',now:'Updated just now',mins:n=>`Updated ${n} min ago`,hours:n=>`Updated ${n} h ago`,
   failed:'Could not reach the city council. Try again in a moment.',
   failedHead:'No answer <em>from the city council.</em>',
-  fav:'Pin to the top as a favourite',unfav:'Remove from favourites',up:'Move up',down:'Move down',show:'Show',
+  fav:'Pin to the top as a favourite',unfav:'Remove from favourites',up:'Move up',down:'Move down',
+  share:'Copy the link to this park',copied:'Link copied',
   edHelp:'Choose which to show and in what order. Favourites always come first.',
   edDrag:' On the page you can also drag the cards.',
   reset:'Reset',done:'Done',close:'Close',
-  footnote:'Data from the Madrid city council alert feed. “Open” means the council has not closed the park; it does not account for each park’s opening hours. The app does.',
+  footnote:'Status from the Madrid city council alert feed and each park’s usual opening hours. The hours do not cover public holidays or one-off changes.',
   home:'Home',app:'iPhone app',privacy:'Privacy'}
 };
 
@@ -401,7 +424,17 @@ function ordered(){
   const base=[...parks].sort((a,b)=>{const x=pos(a.name),y=pos(b.name);return x!==y?(x<y?-1:1):byDefault(a,b)});
   return [...base.filter(p=>isFav(p.name)),...base.filter(p=>!isFav(p.name))];
 }
-const visible=()=>ordered().filter(p=>!isHidden(p.name));
+/* Enlace directo: status.html?parque=retiro enseña solo ese parque, sin tocar
+   lo que el visitante tenga guardado. */
+const norm=x=>String(x).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const qs=new URLSearchParams(location.search);
+const only=(qs.get('parque')||qs.get('park')||'').split(',').map(k=>norm(k).replace(/-/g,' ').trim()).filter(Boolean);
+const linked=p=>only.some(k=>norm(p.name).includes(k));
+const inLink=()=>only.length>0&&!!parks&&parks.some(linked);
+function visible(){
+  const o=ordered();
+  return inLink()?o.filter(linked):o.filter(p=>!isHidden(p.name));
+}
 /* Antes de tocar el orden se escribe entero, para que cada parque tenga sitio. */
 const pinOrder=()=>{prefs.order=ordered().map(p=>p.name)};
 
@@ -434,19 +467,78 @@ function dateline(){
   const d=new Intl.DateTimeFormat(lang==='en'?'en-GB':'es-ES',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Madrid'}).format(new Date());
   return `Madrid · ${d}`;
 }
-/* Lo que el Ayuntamiento cuenta de un parque. La fecha llega todos los días
-   aunque no pase nada, así que no cuenta como incidencia. */
-function story(p,withTag){
+/* ---------- horario ---------- */
+/* Las mismas reglas que la app (src/utils/parkUtils.ts). m: mes 1-12, d: día,
+   w: día de la semana con 0 = domingo. null: ese día no abre. */
+const winter=m=>m>=10||m<=3;
+const HOURS=[
+ ['retiro',     m=>['06:00',winter(m)?'22:00':'00:00']],
+ ['capricho',   (m,d,w)=>(m===12&&d===25)||(m===1&&d===1)||(w!==0&&w!==6)?null:['09:00',winter(m)?'18:30':'21:00']],
+ ['juan carlos',(m,d,w)=>['07:00',m>=6&&m<=9?'01:00':(w===5||w===6)?'00:00':'23:00']],
+ ['juan pablo', ()=>['07:00','23:00']],
+ ['manzanares', m=>['07:00',m>=4&&m<=10?'00:00':'22:00']],
+ ['molinos',    ()=>['06:30','22:00']],
+ ['berro',      m=>['06:30',winter(m)?'22:00':'00:00']],
+ ['torre arias',(m,d,w)=>w===1?null:winter(m)?['09:00','18:00']:['08:00','21:30']],
+ ['rosaleda',   (m,d)=>{const k=m*100+d;return ['10:00',(k>=1101||k<=301)?'18:00':k<=415?'19:00':k<=915?'21:00':'19:00']}]
+];
+const ruleFor=name=>HOURS.find(([k])=>norm(name).includes(k));
+const slug=name=>encodeURIComponent((ruleFor(name)?.[0]||norm(name)).replace(/\s+/g,'-'));
+
+/* La hora que cuenta es la de Madrid, se abra la página desde donde se abra. */
+const clockFmt=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Madrid',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hourCycle:'h23'});
+function madridNow(){
+  const p=Object.fromEntries(clockFmt.formatToParts(new Date()).map(x=>[x.type,+x.value]));
+  return {y:p.year,m:p.month,d:p.day,min:p.hour*60+p.minute};
+}
+const dayAt=(c,off)=>new Date(Date.UTC(c.y,c.m-1,c.d+off));
+const mins=x=>{const [h,m]=x.split(':').map(Number);return h*60+m};
+function schedule(name,c){
+  const rule=ruleFor(name)?.[1];
+  if(!rule) return null;
+  const hrs=off=>{const u=dayAt(c,off);return rule(u.getUTCMonth()+1,u.getUTCDate(),u.getUTCDay())};
+  /* Un cierre a las 00:00 o a la 01:00 pertenece al día siguiente. */
+  const span=h=>{const o=mins(h[0]);let e=mins(h[1]);if(e<=o) e+=1440;return [o,e]};
+  /* De madrugada puede seguir abierto con el horario de ayer. */
+  const y=hrs(-1);
+  if(y&&c.min+1440<span(y)[1]) return {open:true,closes:y[1]};
+  const today=hrs(0);
+  if(today){
+    const [o,e]=span(today);
+    if(c.min>=o&&c.min<e) return {open:true,closes:today[1]};
+    if(c.min<o) return {open:false,next:{off:0,time:today[0]}};
+  }
+  for(let off=1;off<=7;off++){
+    const h=hrs(off);
+    if(h) return {open:false,next:{off,time:h[0],day:dayAt(c,off).getTime()}};
+  }
+  return {open:false,next:null};
+}
+/* El veredicto. El parte del Ayuntamiento manda sobre el reloj, como en la app. */
+function look(p,c){
+  if(p.open===false) return {state:'city'};
+  if(p.open===null) return {state:'none'};
+  const sc=schedule(p.name,c||madridNow());
+  if(!sc) return {state:'open'};
+  return sc.open?{state:'open',closes:sc.closes}:{state:'hours',next:sc.next};
+}
+function whenText(next){
+  const day=next.day?new Intl.DateTimeFormat(lang==='en'?'en-GB':'es-ES',{weekday:'long',timeZone:'UTC'}).format(next.day):'';
+  return T[lang].when(next.off,next.time,day);
+}
+
+/* Lo que hay que saber de un parque, línea a línea. La fecha del parte llega
+   todos los días aunque no pase nada, así que no cuenta como incidencia. */
+function story(p,l){
   const t=T[lang],bits=[];
-  if(withTag&&p.tag) bits.push(`<span class="tag">${esc(t[p.tag])}</span>`);
-  if(p.schedule) bits.push(`${esc(t.restricted)} <span class="nb">${esc(p.schedule)}</span>`);
+  if(l.state==='open'&&l.closes) bits.push(esc(t.closes(l.closes)));
+  if(l.state==='hours'&&l.next) bits.push(esc(t.opens(whenText(l.next))));
+  /* Fuera de horario el aviso del día ya no pinta nada. */
+  if(l.state!=='hours'&&p.schedule) bits.push(`${esc(t.window)} <span class="nb">${esc(p.schedule)}</span>`);
   if(p.notes) bits.push(esc(p.notes));
-  if(p.open===false&&!p.schedule&&!p.notes) bits.push(esc(t.closedByCity));
+  if(l.state==='city'&&!p.schedule&&!p.notes) bits.push(esc(t.closedByCity));
   return bits;
 }
-const DOT='<span class="dotsep">·</span>';
-const isShut=p=>p.open===false;
-const hasNotice=p=>p.open!==false&&p.code!==1;
 
 /* ---------- animación: cada ficha viaja de donde estaba a donde queda ---------- */
 function flip(root,mutate){
@@ -469,29 +561,39 @@ function flip(root,mutate){
 
 /* ---------- pintar ---------- */
 function paintHero(){
-  const t=T[lang],hero=$('#hero'),head=$('#headline'),sub=$('#sub');
+  const t=T[lang],head=$('#headline'),sub=$('#sub');
   $('#dateline').textContent=dateline();
-  hero.classList.remove('solo');
   if(!parks){
     head.innerHTML=failed?t.failedHead:esc(t.loading);
     sub.textContent='';
     page.style.setProperty('--tone',failed?'var(--major)':'var(--none)');
+    document.title=t.title;
     return;
   }
-  const v=visible(),shut=v.filter(isShut),warn=v.filter(hasNotice);
+  const c=madridNow(),v=visible().map(p=>({p,l:look(p,c)}));
+  const city=v.filter(x=>x.l.state==='city'),rest=v.filter(x=>x.l.state==='hours');
+  const open=v.filter(x=>x.l.state==='open'||x.l.state==='none');
+  const warn=open.filter(x=>x.p.code!==1);
   let h,s,tone;
   if(!v.length){
     h=t.noneHead;s=`<button type="button" class="link" data-open-editor>${esc(t.noneSub)}</button>`;tone='var(--none)';
   }else if(v.length===1){
-    /* Un solo parque: la portada entera es la respuesta. */
-    const p=v[0];
-    const word=isShut(p)?t.soloShut:p.open===null?t.soloNone:p.code===1?t.soloOpen:t.soloWarn;
-    hero.classList.add('solo');
-    h=`<span class="who">${esc(p.name)}</span><em>${esc(word)}</em>`;
-    s=story(p,false).join(DOT)||esc(t.soloCalm);
-    tone=isShut(p)?'var(--shut)':p.open===null?'var(--none)':p.tag==='major'?'var(--major)':p.code===1?'var(--open)':'var(--warn-hi)';
-  }else if(shut.length){
-    h=t.shutHead(shut.length);s=t.shutSub(shut.map(p=>esc(p.name)).join(', '),warn.length);tone='var(--shut)';
+    /* Con un parque el titular sigue siendo el resumen y la ficha, el detalle:
+       misma página, solo que más corta. */
+    const {p,l}=v[0],k=l.state==='open'?(p.code===1?'open':'warn'):l.state;
+    h=t.one[k];
+    s=t.oneSub(esc(p.name));
+    tone={open:'var(--open)',warn:p.tag==='major'?'var(--major)':'var(--warn-hi)',city:'var(--shut)',hours:'var(--none)',none:'var(--none)'}[k];
+  }else if(city.length){
+    h=t.shutHead(city.length);s=t.shutSub(city.map(x=>esc(x.p.name)).join(', '),rest.length,warn.length);tone='var(--shut)';
+  }else if(rest.length===v.length){
+    const first=rest.filter(x=>x.l.next).sort((a,b)=>a.l.next.off-b.l.next.off||mins(a.l.next.time)-mins(b.l.next.time))[0];
+    h=t.allHours;s=first?t.firstOpen(esc(first.p.name),esc(whenText(first.l.next))):'';tone='var(--none)';
+  }else if(rest.length){
+    /* Un cierre por horario es rutina (el Capricho solo abre en fin de semana):
+       el titular habla de lo abierto y la rutina baja a la línea de debajo. */
+    h=t.mixHead(open.length,warn.length);s=t.mixSub(rest.map(x=>esc(x.p.name)).join(', '),rest.length);
+    tone=warn.length?'var(--warn-hi)':'var(--open)';
   }else if(warn.length){
     h=t.warnHead(warn.length);s=esc(t.warnSub(warn.length));tone='var(--warn-hi)';
   }else{
@@ -499,15 +601,24 @@ function paintHero(){
   }
   head.innerHTML=h;sub.innerHTML=s;
   page.style.setProperty('--tone',tone);
+  /* La pestaña también responde: anclada, se lee sin abrirla. */
+  const plain=head.textContent.replace(/\.$/,'');
+  document.title=(v.length===1?`${v[0].p.name}: ${plain.toLowerCase()}`:plain)+' · Madrid Parks';
 }
 
-function tile(p){
-  const t=T[lang],shut=isShut(p),none=p.open===null,fav=isFav(p.name),note=story(p,false).join('<br>');
-  const cls=['tile',shut?'shut':'',none?'unknown':'',p.tag==='major'?'major':''].filter(Boolean).join(' ');
+function tile(p,c){
+  const t=T[lang],l=look(p,c),fav=isFav(p.name),note=story(p,l).join('<br>');
+  const shut=l.state==='city'||l.state==='hours';
+  const cls=['tile',{city:'shut',hours:'rest',none:'unknown'}[l.state]||'',p.tag==='major'?'major':''].filter(Boolean).join(' ');
+  /* La pastilla del aviso solo cuando el parque se puede pisar o lo cierra la ciudad. */
+  const pill=p.tag&&l.state!=='hours'?`<span class="pill">${esc(t[p.tag])}</span>`:'';
   return `<article class="${cls}" data-key="${esc(p.name)}">
     <div class="tile-top">
-      <span class="state"><i aria-hidden="true"></i>${esc(shut?t.closed:none?t.nodata:t.open)}${p.tag?`<span class="pill">${esc(t[p.tag])}</span>`:''}</span>
-      <button type="button" class="star" aria-pressed="${fav}" aria-label="${esc(fav?t.unfav:t.fav)}" title="${esc(fav?t.unfav:t.fav)}">${icon('star')}</button>
+      <span class="state"><i aria-hidden="true"></i>${esc(shut?t.closed:l.state==='none'?t.nodata:t.open)}${pill}</span>
+      <span class="acts">
+        <button type="button" class="act share" aria-label="${esc(t.share)}" title="${esc(t.share)}">${icon('link')}</button>
+        <button type="button" class="act star" aria-pressed="${fav}" aria-label="${esc(fav?t.unfav:t.fav)}" title="${esc(fav?t.unfav:t.fav)}">${icon('star')}</button>
+      </span>
     </div>
     <h2 class="name">${esc(p.name)}</h2>
     ${note?`<p class="note">${note}</p>`:''}
@@ -517,10 +628,9 @@ const skeleton=()=>Array.from({length:6},()=>'<article class="tile sk" aria-hidd
 
 function paintGrid(){
   if(!parks){grid.innerHTML=failed?'':skeleton();return}
-  const v=visible();
-  /* Con uno solo ya lo ha dicho la portada. */
-  flip(grid,()=>{grid.innerHTML=v.length>1?v.map(tile).join(''):''});
-  grid.hidden=v.length<=1;
+  const v=visible(),c=madridNow();
+  flip(grid,()=>{grid.innerHTML=v.map(p=>tile(p,c)).join('')});
+  grid.hidden=!v.length;
 }
 
 function paintTools(){
@@ -528,8 +638,9 @@ function paintTools(){
   stamp.textContent=at?ago():t.refresh;
   btn.classList.toggle('stale',!!at&&Date.now()-at>20*6e4);
   btn.title=t.refresh;
-  const c=$('#count');
-  if(parks){const v=visible().length;c.hidden=v===parks.length;c.textContent=`${v}/${parks.length}`}else c.hidden=true;
+  const c=$('#count'),link=inLink();
+  $('#mine-label').textContent=link?t.seeMine:t.mine;
+  if(parks&&!link){const v=visible().length;c.hidden=v===parks.length;c.textContent=`${v}/${parks.length}`}else c.hidden=true;
   const bar=$('#alertbar');bar.hidden=!failed;bar.textContent=t.failed;
 }
 
@@ -559,7 +670,10 @@ function paintEditor(){
   }
 }
 
-function paint(){paintHero();paintGrid();paintTools();paintEditor()}
+/* Lo que cambia solo con el reloj: quién abre, quién cierra y a qué hora. */
+const stateOfPlay=()=>{if(!parks) return '';const c=madridNow();return visible().map(p=>JSON.stringify(look(p,c))).join('|')};
+let lastPlay='';
+function paint(){paintHero();paintGrid();paintTools();paintEditor();lastPlay=stateOfPlay()}
 
 /* ---------- datos ---------- */
 async function load(){
@@ -589,7 +703,7 @@ async function load(){
 /* ---------- arrastrar las fichas (ratón) ---------- */
 let drag=null;
 grid.addEventListener('pointerdown',e=>{
-  if(e.pointerType!=='mouse'||e.button!==0||e.target.closest('button,a')) return;
+  if(e.pointerType!=='mouse'||e.button!==0||inLink()||e.target.closest('button,a')) return;
   const el=e.target.closest('.tile[data-key]');
   if(el) drag={el,x:e.clientX,y:e.clientY,id:e.pointerId,on:false,last:null,lock:0};
 });
@@ -625,9 +739,22 @@ function drop(){
 addEventListener('pointerup',drop);addEventListener('pointercancel',drop);
 
 /* ---------- eventos ---------- */
+async function share(btn,name){
+  const t=T[lang],url=`${location.origin}${location.pathname}?parque=${slug(name)}`;
+  try{
+    if(navigator.share&&matchMedia('(pointer:coarse)').matches){await navigator.share({title:name,url});return}
+    await navigator.clipboard.writeText(url);
+    btn.classList.add('done');btn.title=t.copied;
+    btn.querySelector('use').setAttribute('href','#i-check');
+    setTimeout(()=>{btn.classList.remove('done');btn.title=t.share;btn.querySelector('use').setAttribute('href','#i-link')},1600);
+  }catch(e){
+    if(e.name!=='AbortError') prompt(t.share,url);
+  }
+}
 grid.addEventListener('click',e=>{
-  const star=e.target.closest('.star');
-  if(star) toggleFav(star.closest('[data-key]').dataset.key);
+  const b=e.target.closest('.act');if(!b) return;
+  const name=b.closest('[data-key]').dataset.key;
+  if(b.classList.contains('star')) toggleFav(name); else share(b,name);
 });
 picks.addEventListener('click',e=>{
   const b=e.target.closest('button[data-role]');if(!b) return;
@@ -637,18 +764,31 @@ picks.addEventListener('click',e=>{
 picks.addEventListener('change',e=>{
   if(e.target.matches('input[data-role="vis"]')) toggleHidden(e.target.closest('li').dataset.key);
 });
-function openEditor(){if(!parks||editor.open) return;editor.showModal();paintEditor()}
+function openEditor(){
+  if(inLink()){location.assign(location.pathname);return}
+  if(!parks||editor.open) return;editor.showModal();paintEditor();
+}
 $('#open-editor').addEventListener('click',openEditor);
 $('#hero').addEventListener('click',e=>{if(e.target.closest('[data-open-editor]')) openEditor()});
 $('#ed-close').addEventListener('click',()=>editor.close());
 $('#ed-done').addEventListener('click',()=>editor.close());
 $('#ed-reset').addEventListener('click',()=>{prefs={order:[],hidden:[],fav:[]};commit()});
 editor.addEventListener('click',e=>{if(e.target===editor) editor.close()});
+editor.addEventListener('close',()=>{if(stateOfPlay()!==lastPlay) paint()});
 
 $('#refresh').addEventListener('click',load);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&at&&Date.now()-at>5*6e4) load()});
-/* El sello envejece solo, y cada cinco minutos se vuelve a preguntar. */
-setInterval(()=>{if(!document.hidden) paintTools()},30000);
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden||!at) return;
+  if(Date.now()-at>5*6e4) load(); else if(stateOfPlay()!==lastPlay) paint();
+});
+/* El sello envejece solo, el reloj mueve los horarios, y cada cinco minutos
+   se vuelve a preguntar al Ayuntamiento. */
+setInterval(()=>{
+  if(document.hidden) return;
+  paintTools();
+  /* Si en este rato algún parque ha abierto o cerrado, se repinta todo. */
+  if(!drag&&!editor.open&&stateOfPlay()!==lastPlay) paint();
+},30000);
 setInterval(()=>{if(!document.hidden&&!drag) load()},5*6e4);
 
 function setLang(n){
