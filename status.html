@@ -1,407 +1,389 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estado de los parques de Madrid</title>
-    <meta name="description" content="Estado en tiempo real de los parques de Madrid: abierto o cerrado, avisos y cierres del Ayuntamiento.">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estado de los parques de Madrid</title>
+<meta name="description" content="¿Está abierto el Retiro ahora mismo? Estado en tiempo real de los parques de Madrid, según el parte de alertas del Ayuntamiento.">
+<meta name="theme-color" content="#F7F8F5">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
 
-        :root {
-            --background: #F2F2F7;
-            --surface: #FFFFFF;
-            --card: #FFFFFF;
-            --primaryText: #000000;
-            --secondaryText: #8E8E93;
-            --tint: #007AFF;
-            --statusNormal: #34C759;
-            --statusWarning: #FFD700;
-            --statusMajor: #FF9500;
-            --statusAlert: #FF3B30;
-            --statusClosed: #8E8E93;
-            --border: #C6C6C8;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --warningBackground: #FFF3CD;
-            --warningText: #856404;
-        }
+:root{
+  --bg:#F4F6F2;
+  --surface:#FFFFFF;
+  --ink:#16201A;
+  --ink-soft:#5E6B62;
+  --ink-faint:#92A09A;
+  --line:#E2E7DF;
+  --line-soft:#EDF1EA;
+  --accent:#1D7F4E;
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --background: #000000;
-                --surface: #1C1C1E;
-                --card: #2C2C2E;
-                --primaryText: #FFFFFF;
-                --secondaryText: #8E8E93;
-                --tint: #0A84FF;
-                --statusNormal: #30D158;
-                --statusWarning: #FFD700;
-                --statusMajor: #FF9F0A;
-                --statusAlert: #FF453A;
-                --statusClosed: #8E8E93;
-                --border: #38383A;
-                --shadow: rgba(0, 0, 0, 0.3);
-                --warningBackground: #2C2C2E;
-                --warningText: #FFD700;
-            }
-        }
+  --open:#2EA55C;
+  --warn:#E0A500;
+  --major:#E07A1F;
+  --alert:#D93B30;
+  --shut:#8A958E;
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: var(--primaryText);
-            background: var(--background);
-            min-height: 100vh;
-        }
+  --radius:18px;
+  --shadow:0 1px 2px rgba(22,32,26,.04), 0 8px 24px rgba(22,32,26,.05);
+}
 
-        .container { max-width: 760px; margin: 0 auto; padding: 24px 20px 60px; }
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0D110F;
+    --surface:#161B18;
+    --ink:#ECF1EC;
+    --ink-soft:#9BA8A0;
+    --ink-faint:#6B776F;
+    --line:#252D28;
+    --line-soft:#1D2420;
+    --accent:#4FCB86;
 
-        .head-row {
-            display: flex; align-items: flex-start;
-            justify-content: space-between; gap: 16px;
-        }
-        .language-selector select {
-            background: var(--card); color: var(--primaryText);
-            border: 1px solid var(--border); border-radius: 10px;
-            padding: 8px 12px; font-size: 0.85rem; cursor: pointer; flex: none;
-        }
+    --open:#3FCB77;
+    --warn:#F0C040;
+    --major:#F2913C;
+    --alert:#FF5A4D;
+    --shut:#78847C;
 
-        header {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 20px; padding: 32px 28px; margin-bottom: 20px;
-            box-shadow: 0 4px 20px var(--shadow);
-        }
-        h1 { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
-        .subtitle { color: var(--secondaryText); font-size: 0.95rem; }
+    --shadow:none;
+  }
+}
 
-        .toolbar {
-            display: flex; align-items: center; gap: 12px;
-            flex-wrap: wrap; margin-top: 20px;
-        }
-        button {
-            font: inherit; font-size: 0.9rem; font-weight: 500;
-            color: var(--primaryText); background: var(--card);
-            border: 1px solid var(--border); border-radius: 10px;
-            padding: 9px 16px; cursor: pointer;
-            display: inline-flex; align-items: center; gap: 8px;
-            transition: border-color .15s, opacity .15s;
-        }
-        button:hover:not(:disabled) { border-color: var(--secondaryText); }
-        button:disabled { opacity: .5; cursor: default; }
-        .spinner {
-            width: 12px; height: 12px; border: 2px solid currentColor;
-            border-right-color: transparent; border-radius: 50%; display: none;
-        }
-        body.loading .spinner { display: inline-block; animation: spin .7s linear infinite; }
-        body.loading .arrow { display: none; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--ink);
+  line-height:1.55;-webkit-font-smoothing:antialiased;
+  font-feature-settings:"tnum" 1;
+}
 
-        .summary { color: var(--secondaryText); font-size: 0.9rem; }
-        .summary .stale { color: var(--statusMajor); }
+.wrap{max-width:660px;margin:0 auto;padding:clamp(20px,5vw,56px) 20px 64px}
 
-        .banner {
-            display: none; background: var(--warningBackground); color: var(--warningText);
-            border: 1px solid var(--border); border-radius: 12px;
-            padding: 12px 16px; font-size: 0.9rem; margin-bottom: 16px;
-        }
-        .banner.visible { display: block; }
+/* ---------- barra superior ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:.95rem;letter-spacing:-.01em}
+.brand .leaf{font-size:1.15rem;line-height:1}
+.brand a{color:inherit;text-decoration:none}
+select{
+  font:inherit;font-size:.82rem;color:var(--ink-soft);
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:10px;padding:7px 10px;cursor:pointer;
+}
+select:hover{border-color:var(--ink-faint)}
 
-        .park {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 16px; padding: 18px 20px; margin-bottom: 12px;
-            box-shadow: 0 2px 10px var(--shadow);
-        }
-        .park-head {
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 14px; flex-wrap: wrap;
-        }
-        .park h2 { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.2px; }
-        .badges { display: flex; align-items: center; gap: 8px; flex: none; }
-        .badge {
-            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.4px;
-            padding: 5px 12px; border-radius: 20px; color: #fff; white-space: nowrap;
-        }
-        .badge.alert-code { font-weight: 600; }
-        .status-line { color: var(--secondaryText); font-size: 0.92rem; margin-top: 6px; }
+/* ---------- titular: la respuesta ---------- */
+.verdict{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:30px 30px 26px;margin-bottom:14px;position:relative;overflow:hidden;
+}
+.verdict::before{
+  content:"";position:absolute;inset:0 0 auto 0;height:3px;
+  background:var(--tone,var(--open));
+}
+.verdict h1{
+  font-size:clamp(1.75rem,6vw,2.3rem);font-weight:700;
+  letter-spacing:-.025em;line-height:1.12;margin-bottom:8px;
+}
+.verdict .detail{color:var(--ink-soft);font-size:1rem}
+.verdict .detail b{color:var(--ink);font-weight:600}
 
-        .incident {
-            background: var(--warningBackground); border-left: 4px solid var(--border);
-            border-radius: 8px; padding: 12px 14px; margin-top: 14px;
-        }
-        .incident h3 {
-            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.4px;
-            text-transform: uppercase; color: var(--warningText); margin-bottom: 6px;
-        }
-        .incident p { font-size: 0.88rem; color: var(--warningText); margin-bottom: 2px; }
-        .incident .label { font-weight: 600; }
+.meta{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  margin-top:22px;padding-top:18px;border-top:1px solid var(--line-soft);
+}
+.stamp{color:var(--ink-faint);font-size:.82rem}
+.stamp.stale{color:var(--major)}
+button{
+  font:inherit;font-size:.84rem;font-weight:500;color:var(--ink-soft);
+  background:transparent;border:1px solid var(--line);border-radius:999px;
+  padding:7px 15px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+  transition:border-color .15s,color .15s;margin-left:auto;
+}
+button:hover:not(:disabled){border-color:var(--ink-faint);color:var(--ink)}
+button:disabled{opacity:.45;cursor:default}
+.spin{width:11px;height:11px;border:1.5px solid currentColor;border-right-color:transparent;border-radius:50%;display:none}
+body.busy .spin{display:inline-block;animation:sp .6s linear infinite}
+body.busy .glyph{display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
 
-        .placeholder { color: var(--secondaryText); text-align: center; padding: 50px 20px; }
+/* ---------- aviso de error ---------- */
+.alertbar{
+  display:none;background:var(--surface);border:1px solid var(--line);
+  border-left:3px solid var(--major);border-radius:12px;
+  padding:13px 16px;font-size:.88rem;color:var(--ink-soft);margin-bottom:14px;
+}
+.alertbar.on{display:block}
 
-        footer {
-            text-align: center; color: var(--secondaryText); font-size: 0.85rem;
-            padding: 28px 0 0; line-height: 1.9;
-        }
-        footer a { color: var(--tint); text-decoration: none; }
-        footer a:hover { text-decoration: underline; }
+/* ---------- lista ---------- */
+.group-label{
+  font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-faint);margin:26px 0 10px 4px;
+}
+.park{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;margin-bottom:8px;
+  padding:16px 18px 16px 21px;position:relative;overflow:hidden;
+  transition:border-color .15s;
+}
+.park::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tone)}
+.park.calm{padding-top:13px;padding-bottom:13px}
 
-        @media (max-width: 560px) {
-            .container { padding: 20px 16px 48px; }
-            .head-row { flex-direction: column; gap: 12px; }
-            header { padding: 26px 20px; }
-            h1 { font-size: 1.6rem; }
-            .park-head { align-items: flex-start; flex-direction: column; }
-        }
-    </style>
+.row{display:flex;align-items:center;gap:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--tone);flex:none;
+     box-shadow:0 0 0 3.5px color-mix(in srgb,var(--tone) 18%,transparent)}
+.name{font-weight:600;font-size:.98rem;letter-spacing:-.012em;flex:1;min-width:0}
+.state{font-size:.78rem;font-weight:600;color:var(--tone);white-space:nowrap;letter-spacing:.01em}
+.state .sep{color:var(--ink-faint);font-weight:400;margin:0 5px}
+.state .shutlabel{color:var(--shut)}
+
+.note{
+  margin-top:9px;padding-left:20px;font-size:.85rem;color:var(--ink-soft);
+  display:flex;flex-direction:column;gap:2px;
+}
+.note b{font-weight:600;color:var(--ink)}
+
+.placeholder{color:var(--ink-faint);text-align:center;padding:56px 20px;font-size:.95rem}
+
+footer{
+  margin-top:34px;padding-top:22px;border-top:1px solid var(--line-soft);
+  color:var(--ink-faint);font-size:.8rem;line-height:1.9;text-align:center;
+}
+footer a{color:var(--accent);text-decoration:none}
+footer a:hover{text-decoration:underline}
+footer .sep{margin:0 7px;opacity:.5}
+
+@media (max-width:520px){
+  .verdict{padding:24px 22px 22px}
+  .park{padding:14px 15px 14px 18px}
+  .row{gap:10px}
+  .state{font-size:.74rem}
+  button{margin-left:0}
+  .meta{gap:10px}
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="head-row">
-                <div>
-                    <h1 data-key="title">Parques de Madrid</h1>
-                    <p class="subtitle" data-key="subtitle">Estado en tiempo real, según el parte de alertas del Ayuntamiento.</p>
-                </div>
-                <div class="language-selector">
-                    <select id="languageSelect" onchange="changeLanguage(this.value)" aria-label="Idioma / Language">
-                        <option value="es">🇪🇸 Español</option>
-                        <option value="en">🇺🇸 English</option>
-                    </select>
-                </div>
-            </div>
-            <div class="toolbar">
-                <button id="refresh" type="button">
-                    <span class="spinner" aria-hidden="true"></span>
-                    <span class="arrow" aria-hidden="true">↻</span>
-                    <span data-key="refresh">Actualizar</span>
-                </button>
-                <span class="summary" id="summary" data-key="loading">Consultando al Ayuntamiento…</span>
-            </div>
-        </header>
+<div class="wrap">
 
-        <div class="banner" id="banner" role="status"></div>
+  <div class="top">
+    <div class="brand"><span class="leaf">🌳</span><a href="index.html" data-k="brand">Madrid Parks</a></div>
+    <select id="lang" onchange="setLang(this.value)" aria-label="Idioma / Language">
+      <option value="es">Español</option>
+      <option value="en">English</option>
+    </select>
+  </div>
 
-        <main id="list" aria-live="polite">
-            <p class="placeholder" data-key="loading">Consultando al Ayuntamiento…</p>
-        </main>
-
-        <footer>
-            <span data-key="source">Datos del parte de alertas del Ayuntamiento de Madrid.</span><br>
-            <a href="index.html" data-key="home">Inicio</a> ·
-            <a href="https://apps.apple.com/us/app/madrid-parks/id6748036225" data-key="app">La app para iPhone</a> ·
-            <a href="privacy.html" data-key="privacy">Política de privacidad</a>
-        </footer>
+  <section class="verdict" id="verdict">
+    <h1 id="headline" data-k="loading">Consultando…</h1>
+    <p class="detail" id="detail"></p>
+    <div class="meta">
+      <span class="stamp" id="stamp"></span>
+      <button id="refresh" type="button">
+        <span class="spin" aria-hidden="true"></span><span class="glyph" aria-hidden="true">↻</span>
+        <span data-k="refresh">Actualizar</span>
+      </button>
     </div>
+  </section>
+
+  <div class="alertbar" id="alertbar" role="status"></div>
+
+  <main id="list" aria-live="polite"></main>
+
+  <footer>
+    <span data-k="source">Datos del parte de alertas del Ayuntamiento de Madrid.</span><br>
+    <a href="index.html" data-k="home">Inicio</a><span class="sep">·</span>
+    <a href="https://apps.apple.com/us/app/madrid-parks/id6748036225" data-k="app">App para iPhone</a><span class="sep">·</span>
+    <a href="privacy.html" data-k="privacy">Privacidad</a>
+  </footer>
+
+</div>
 
 <script>
-(() => {
-    'use strict';
+(()=>{
+'use strict';
 
-    const API = 'https://sigma.madrid.es/hosted/rest/services/MEDIO_AMBIENTE/ALERTAS_PARQUES/MapServer/0/query'
-        + '?f=json&where=1%3D1&outFields=*&returnGeometry=false';
+const API='https://sigma.madrid.es/hosted/rest/services/MEDIO_AMBIENTE/ALERTAS_PARQUES/MapServer/0/query'
+  +'?f=json&where=1%3D1&outFields=*&returnGeometry=false';
 
-    // Mismo mapa que usa la app (STATUS_MAPPING en src/utils/themes.ts).
-    // `open` contesta la única pregunta que importa: ¿puedo entrar?
-    // `rank` ordena por gravedad, lo más grave arriba.
-    const STATES = {
-        0: { key: 'closed',  open: false, color: 'var(--statusClosed)',  rank: 2 },
-        1: { key: 'normal',  open: true,  color: 'var(--statusNormal)',  rank: 5 },
-        2: { key: 'unknown', open: null,  color: 'var(--statusClosed)',  rank: 4 },
-        3: { key: 'warning', open: true,  color: 'var(--statusWarning)', rank: 3 },
-        4: { key: 'major',   open: true,  color: 'var(--statusMajor)',   rank: 1 },
-        5: { key: 'alert',   open: false, color: 'var(--statusAlert)',   rank: 0 },
-        6: { key: 'closed',  open: false, color: 'var(--statusClosed)',  rank: 2 }
-    };
-    const UNKNOWN = STATES[2];
+/* Mismo mapa que STATUS_MAPPING en la app.
+   open: ¿puedo entrar?   rank: gravedad, lo peor primero. */
+const S={
+ 0:{k:'closed', open:false, tone:'var(--shut)',  rank:2},
+ 1:{k:'normal', open:true,  tone:'var(--open)',  rank:5},
+ 2:{k:'unknown',open:null,  tone:'var(--shut)',  rank:4},
+ 3:{k:'warning',open:true,  tone:'var(--warn)',  rank:3},
+ 4:{k:'major',  open:true,  tone:'var(--major)', rank:1},
+ 5:{k:'alert',  open:false, tone:'var(--alert)', rank:0},
+ 6:{k:'closed', open:false, tone:'var(--shut)',  rank:2}
+};
+const UNK=S[2];
+/* La pastilla del código solo cuando añade algo: con 0 y 6 repetiría
+   "Cerrado", y con 1 no hay nada que contar. */
+const CODE={2:'unknown',3:'warning',4:'major',5:'alert'};
 
-    // Solo se muestra la pastilla del código cuando añade algo: con 0 y 6 diría
-    // "Cerrado" al lado de una insignia que ya lo dice, y con 1 no hay nada que
-    // contar. Es la misma regla que la app.
-    const CODE_BADGE = { 2: 'unknown', 3: 'warning', 4: 'major', 5: 'alert' };
+const T={
+ es:{brand:'Madrid Parks',refresh:'Actualizar',loading:'Consultando…',
+  open:'Abierto',closed:'Cerrado',
+  unknown:'Sin datos',warning:'Aviso',major:'Incidencia',alert:'Alerta',
+  allClear:'Todo abierto',allClearSub:n=>`Los ${n} parques están abiertos y sin incidencias.`,
+  someWarn:n=>n===1?'Un parque con aviso':`${n} parques con aviso`,
+  someWarnSub:'Se puede entrar, pero el Ayuntamiento ha comunicado algo.',
+  someShut:n=>n===1?'Un parque cerrado':`${n} parques cerrados`,
+  shutList:names=>`Cerrado: <b>${names}</b>.`,
+  schedule:'Horario',notes:'Observaciones',restricted:'Horario reducido',
+  closedByCity:'Cerrado por el Ayuntamiento',
+  needAttention:'Con algo que contar',fine:'Sin novedad',
+  source:'Datos del parte de alertas del Ayuntamiento de Madrid.',
+  home:'Inicio',app:'App para iPhone',privacy:'Privacidad',
+  now:'actualizado hace un momento',min:'actualizado hace 1 minuto',
+  mins:n=>`actualizado hace ${n} minutos`,hour:'actualizado hace 1 hora',hours:n=>`actualizado hace ${n} horas`,
+  failed:'No se ha podido consultar al Ayuntamiento. Inténtalo de nuevo en un momento.',
+  failedTitle:'Sin conexión con el Ayuntamiento'},
+ en:{brand:'Madrid Parks',refresh:'Refresh',loading:'Checking…',
+  open:'Open',closed:'Closed',
+  unknown:'No data',warning:'Notice',major:'Incident',alert:'Alert',
+  allClear:'All open',allClearSub:n=>`All ${n} parks are open, with nothing reported.`,
+  someWarn:n=>n===1?'One park with a notice':`${n} parks with a notice`,
+  someWarnSub:'You can go in, but the city council has reported something.',
+  someShut:n=>n===1?'One park closed':`${n} parks closed`,
+  shutList:names=>`Closed: <b>${names}</b>.`,
+  schedule:'Hours',notes:'Notes',restricted:'Reduced hours',
+  closedByCity:'Closed by the city council',
+  needAttention:'Something reported',fine:'Nothing reported',
+  source:'Data from the Madrid city council alert feed.',
+  home:'Home',app:'iPhone app',privacy:'Privacy',
+  now:'updated just now',min:'updated 1 minute ago',
+  mins:n=>`updated ${n} minutes ago`,hour:'updated 1 hour ago',hours:n=>`updated ${n} hours ago`,
+  failed:'Could not reach the city council. Try again in a moment.',
+  failedTitle:'No answer from the city council'}
+};
 
-    const T = {
-        es: {
-            title: 'Parques de Madrid',
-            subtitle: 'Estado en tiempo real, según el parte de alertas del Ayuntamiento.',
-            refresh: 'Actualizar', loading: 'Consultando al Ayuntamiento…',
-            open: 'Abierto', closed: 'Cerrado',
-            unknown: 'Estado desconocido', warning: 'Aviso',
-            major: 'Incidencia', alert: 'Alerta',
-            incident: 'Información de la incidencia',
-            schedule: 'Horario', date: 'Fecha', notes: 'Observaciones',
-            closedByCity: 'Cerrado por el Ayuntamiento',
-            source: 'Datos del parte de alertas del Ayuntamiento de Madrid.',
-            home: 'Inicio', app: 'La app para iPhone', privacy: 'Política de privacidad',
-            justNow: 'hace un momento', oneMin: 'hace 1 minuto',
-            mins: n => `hace ${n} minutos`, oneHour: 'hace 1 hora', hours: n => `hace ${n} horas`,
-            openCount: n => `${n} ${n === 1 ? 'abierto' : 'abiertos'}`,
-            closedCount: n => `${n} ${n === 1 ? 'cerrado' : 'cerrados'}`,
-            failed: 'No se ha podido consultar al Ayuntamiento. Inténtalo de nuevo en un momento.'
-        },
-        en: {
-            title: 'Madrid parks',
-            subtitle: 'Live status, from the city council alert feed.',
-            refresh: 'Refresh', loading: 'Asking the city council…',
-            open: 'Open', closed: 'Closed',
-            unknown: 'Status unknown', warning: 'Warning',
-            major: 'Incident', alert: 'Alert',
-            incident: 'Incident information',
-            schedule: 'Hours', date: 'Date', notes: 'Notes',
-            closedByCity: 'Closed by the city council',
-            source: 'Data from the Madrid city council alert feed.',
-            home: 'Home', app: 'The iPhone app', privacy: 'Privacy policy',
-            justNow: 'just now', oneMin: '1 minute ago',
-            mins: n => `${n} minutes ago`, oneHour: '1 hour ago', hours: n => `${n} hours ago`,
-            openCount: n => `${n} open`,
-            closedCount: n => `${n} closed`,
-            failed: 'Could not reach the city council. Try again in a moment.'
-        }
-    };
+let lang='es', parks=null, at=null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-    let lang = 'es';
-    let parks = null;
-    let fetchedAt = null;
+/* El servicio trae horas imposibles: el 12/11/2026 el Retiro venía con
+   "00:60 a 21:00". No se corrige —no sabemos si era 00:00 o 06:00— se marca. */
+function clean(v){
+  if(v===null||v===undefined) return '';
+  const t=String(v).trim();
+  if(!t||t==='null') return '';
+  return t.replace(/\s+a\s+/gi,' – ').replace(/\b24:00\b/g,'00:00')
+    .replace(/\b(\d{1,2}):(\d{2})\b/g,(o,h,m)=>(+h>23||+m>59)?`${o} (sic)`:o);
+}
 
-    const $ = sel => document.querySelector(sel);
-    const esc = s => String(s ?? '').replace(/[&<>"]/g,
-        c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function ago(){
+  const t=T[lang], m=Math.round((Date.now()-at)/6e4);
+  if(m<1) return t.now; if(m===1) return t.min; if(m<60) return t.mins(m);
+  const h=Math.round(m/60); return h===1?t.hour:t.hours(h);
+}
 
-    /**
-     * Limpia los textos del servicio. A veces trae horas imposibles: el
-     * 12/11/2026 el Retiro venía con "00:60 a 21:00". No se corrige —no sabemos
-     * si querían decir 00:00 o 06:00— pero se marca, para que no parezca un
-     * error nuestro. Misma decisión que toma la app.
-     */
-    function clean(value) {
-        if (value === null || value === undefined) return '';
-        const text = String(value).trim();
-        if (!text || text === 'null') return '';
-        return text
-            .replace(/\s+a\s+/gi, ' – ')
-            .replace(/\b24:00\b/g, '00:00')
-            .replace(/\b(\d{1,2}):(\d{2})\b/g,
-                (orig, h, m) => (Number(h) > 23 || Number(m) > 59) ? `${orig} (sic)` : orig);
-    }
+function paint(){
+  if(!parks) return;
+  const t=T[lang];
+  const shut=parks.filter(p=>p.open===false);
+  const warn=parks.filter(p=>p.open!==false&&p.code!==1);
 
-    function ago(when) {
-        const t = T[lang];
-        const mins = Math.round((Date.now() - when) / 60000);
-        if (mins < 1) return t.justNow;
-        if (mins === 1) return t.oneMin;
-        if (mins < 60) return t.mins(mins);
-        const hrs = Math.round(mins / 60);
-        return hrs === 1 ? t.oneHour : t.hours(hrs);
-    }
+  /* El titular ES la respuesta, y el tono del borde la refuerza. */
+  let head,sub,tone;
+  if(shut.length){ head=t.someShut(shut.length); sub=t.shutList(shut.map(p=>esc(p.name)).join(', ')); tone='var(--alert)'; }
+  else if(warn.length){ head=t.someWarn(warn.length); sub=t.someWarnSub; tone='var(--warn)'; }
+  else { head=t.allClear; sub=t.allClearSub(parks.length); tone='var(--open)'; }
 
-    function render() {
-        const t = T[lang];
-        if (!parks) return;
+  $('#headline').textContent=head;
+  $('#detail').innerHTML=sub;
+  $('#verdict').style.setProperty('--tone',tone);
+  const stale=Date.now()-at>20*6e4;
+  $('#stamp').className='stamp'+(stale?' stale':'');
+  $('#stamp').textContent=ago();
 
-        const openN = parks.filter(p => p.open === true).length;
-        const closedN = parks.filter(p => p.open === false).length;
-        const stale = Date.now() - fetchedAt > 20 * 60 * 1000;
+  /* Dos grupos: lo que pide atención arriba, lo tranquilo abajo y en silencio. */
+  const busy=parks.filter(p=>p.code!==1).sort((a,b)=>a.rank-b.rank||a.name.localeCompare(b.name,'es'));
+  const calm=parks.filter(p=>p.code===1).sort((a,b)=>a.name.localeCompare(b.name,'es'));
 
-        const bits = [];
-        if (closedN) bits.push(`<strong>${t.closedCount(closedN)}</strong>`);
-        bits.push(t.openCount(openN));
-        $('#summary').innerHTML = bits.join(' · ')
-            + ` · <span class="${stale ? 'stale' : ''}">${esc(ago(fetchedAt))}</span>`;
+  const card=(p,quiet)=>{
+    const code=CODE[p.code];
+    const state=p.open===false
+      ? `<span class="shutlabel">${esc(t.closed)}</span>${code?`<span class="sep">·</span>${esc(t[code])}`:''}`
+      : `${esc(t.open)}${code?`<span class="sep">·</span>${esc(t[code])}`:''}`;
 
-        $('#list').innerHTML = parks.slice()
-            .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name, 'es'))
-            .map(p => {
-                const rows = [
-                    p.schedule && [t.schedule, p.schedule],
-                    p.date && [t.date, p.date],
-                    p.notes && [t.notes, p.notes]
-                ].filter(Boolean);
+    /* Nada de recuadros: una línea discreta, y solo si hay algo real.
+       La fecha llega todos los días aunque no pase nada, así que no cuenta. */
+    const bits=[];
+    if(p.schedule) bits.push(`<span><b>${esc(t.restricted)}:</b> ${esc(p.schedule)}</span>`);
+    if(p.notes) bits.push(`<span>${esc(p.notes)}</span>`);
+    if(p.open===false&&!bits.length) bits.push(`<span>${esc(t.closedByCity)}</span>`);
 
-                const codeKey = CODE_BADGE[p.code];
-                const codeBadge = codeKey
-                    ? `<span class="badge alert-code" style="background:${p.color};${p.code === 3 ? 'color:#4A3B00' : ''}">${esc(t[codeKey])}</span>`
-                    : '';
-                const openBadge = `<span class="badge" style="background:${p.open === false ? 'var(--statusClosed)' : 'var(--statusNormal)'}">${esc(p.open === false ? t.closed : t.open)}</span>`;
+    return `<article class="park${quiet?' calm':''}" style="--tone:${p.tone}">
+      <div class="row">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="name">${esc(p.name)}</span>
+        <span class="state">${state}</span>
+      </div>
+      ${bits.length?`<div class="note">${bits.join('')}</div>`:''}
+    </article>`;
+  };
 
-                return `<article class="park">
-                    <div class="park-head">
-                        <h2>${esc(p.name)}</h2>
-                        <span class="badges">${codeBadge}${openBadge}</span>
-                    </div>
-                    ${p.open === false ? `<p class="status-line">${esc(t.closedByCity)}</p>` : ''}
-                    ${rows.length ? `<div class="incident" style="border-left-color:${p.color}">
-                        <h3>${esc(t.incident)}</h3>
-                        ${rows.map(([k, v]) => `<p><span class="label">${esc(k)}:</span> ${esc(v)}</p>`).join('')}
-                    </div>` : ''}
-                </article>`;
-            }).join('');
-    }
+  let html='';
+  if(busy.length) html+=`<p class="group-label">${esc(t.needAttention)}</p>`+busy.map(p=>card(p,false)).join('');
+  if(calm.length) html+=`<p class="group-label">${esc(t.fine)}</p>`+calm.map(p=>card(p,true)).join('');
+  $('#list').innerHTML=html;
+}
 
-    async function load() {
-        document.body.classList.add('loading');
-        $('#refresh').disabled = true;
-        try {
-            // El servicio devuelve CORS para cualquier origen y acepta GET, así
-            // que esta página estática habla con él directamente desde el
-            // navegador. No hay servidor intermedio que mantener.
-            const res = await fetch(API, { cache: 'no-store' });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-            if (!Array.isArray(data.features)) throw new Error('respuesta inesperada');
+async function load(){
+  document.body.classList.add('busy'); $('#refresh').disabled=true;
+  try{
+    /* El servicio devuelve CORS para cualquier origen y acepta GET, así que
+       esta página estática habla con él directamente. Sin backend. */
+    const r=await fetch(API,{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(!Array.isArray(d.features)) throw new Error('respuesta inesperada');
 
-            parks = data.features.map(f => {
-                const a = f.attributes || {};
-                const code = Number.parseInt(a.ALERTA_DESCRIPCION, 10);
-                const state = Number.isNaN(code) ? UNKNOWN : (STATES[code] || UNKNOWN);
-                return {
-                    name: String(a.ZONA_VERDE || '—').trim(),
-                    code: Number.isNaN(code) ? null : code,
-                    ...state,
-                    date: clean(a.FECHA_INCIDENCIA),
-                    // La fecha llega todos los días, haya incidencia o no, así
-                    // que por sí sola no abre el recuadro: sin horario ni
-                    // observaciones no hay nada que contar.
-                    schedule: clean(a.HORARIO_INCIDENCIA),
-                    notes: clean(a.OBSERVACIONES)
-                };
-            }).map(p => (!p.schedule && !p.notes) ? { ...p, date: '' } : p);
-
-            fetchedAt = Date.now();
-            $('#banner').classList.remove('visible');
-            render();
-        } catch (err) {
-            const banner = $('#banner');
-            banner.textContent = T[lang].failed;
-            banner.classList.add('visible');
-            if (!parks) $('#list').innerHTML = `<p class="placeholder">${esc(T[lang].failed)}</p>`;
-        } finally {
-            document.body.classList.remove('loading');
-            $('#refresh').disabled = false;
-        }
-    }
-
-    window.changeLanguage = function (next) {
-        lang = T[next] ? next : 'es';
-        document.documentElement.lang = lang;
-        try { localStorage.setItem('parksLang', lang); } catch (e) { /* da igual */ }
-        document.querySelectorAll('[data-key]').forEach(el => {
-            const v = T[lang][el.getAttribute('data-key')];
-            if (typeof v === 'string') el.textContent = v;
-        });
-        document.title = lang === 'en' ? 'Madrid parks status' : 'Estado de los parques de Madrid';
-        render();
-    };
-
-    $('#refresh').addEventListener('click', () => load());
-
-    // Al volver a la pestaña tras un rato, el dato de pantalla ya no vale.
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && fetchedAt && Date.now() - fetchedAt > 5 * 60 * 1000) load();
+    parks=d.features.map(f=>{
+      const a=f.attributes||{}, c=Number.parseInt(a.ALERTA_DESCRIPCION,10);
+      const st=Number.isNaN(c)?UNK:(S[c]||UNK);
+      return {name:String(a.ZONA_VERDE||'—').trim(),code:Number.isNaN(c)?null:c,...st,
+              schedule:clean(a.HORARIO_INCIDENCIA),notes:clean(a.OBSERVACIONES)};
     });
+    at=Date.now();
+    $('#alertbar').classList.remove('on');
+    paint();
+  }catch(e){
+    const b=$('#alertbar'); b.textContent=T[lang].failed; b.classList.add('on');
+    if(!parks){ $('#headline').textContent=T[lang].failedTitle; $('#detail').textContent='';
+      $('#verdict').style.setProperty('--tone','var(--major)');
+      $('#list').innerHTML=`<p class="placeholder">${esc(T[lang].failed)}</p>`; }
+  }finally{
+    document.body.classList.remove('busy'); $('#refresh').disabled=false;
+  }
+}
 
-    let stored = null;
-    try { stored = localStorage.getItem('parksLang'); } catch (e) { /* da igual */ }
-    changeLanguage(stored || (navigator.language || 'es').slice(0, 2));
-    $('#languageSelect').value = lang;
-    load();
+window.setLang=function(n){
+  lang=T[n]?n:'es';
+  document.documentElement.lang=lang;
+  try{localStorage.setItem('parksLang',lang)}catch(e){}
+  document.querySelectorAll('[data-k]').forEach(el=>{
+    const v=T[lang][el.getAttribute('data-k')];
+    if(typeof v==='string') el.textContent=v;
+  });
+  document.title=lang==='en'?'Madrid parks status':'Estado de los parques de Madrid';
+  paint();
+};
+
+$('#refresh').addEventListener('click',()=>load());
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&at&&Date.now()-at>5*6e4) load();
+});
+/* El sello "hace X minutos" envejece solo aunque no se recargue. */
+setInterval(()=>{ if(at&&!document.hidden) $('#stamp').textContent=ago(); },30000);
+
+let saved=null; try{saved=localStorage.getItem('parksLang')}catch(e){}
+setLang(saved||(navigator.language||'es').slice(0,2));
+$('#lang').value=lang;
+load();
 })();
 </script>
 </body>
