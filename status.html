@@ -124,6 +124,20 @@ h1 em{font-style:italic;color:var(--tone)}
 .btn:hover{border-color:var(--ink-3)}
 .btn .count{font-size:.74rem;font-weight:650;color:var(--bg);background:var(--ink);border-radius:999px;padding:1px 7px;margin-right:-4px}
 
+.tools-right{display:flex;align-items:center;gap:8px}
+.bell{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink-2);transition:border-color .15s,color .15s}
+.bell:hover{border-color:var(--ink-3);color:var(--ink)}
+.bell[aria-pressed="true"]{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.bell[aria-pressed="true"] svg{fill:color-mix(in srgb,currentColor 24%,transparent)}
+.toast{
+  position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));z-index:10;
+  transform:translate(-50%,12px);opacity:0;pointer-events:none;
+  max-width:min(440px,calc(100vw - 32px));padding:11px 18px;border-radius:14px;
+  background:var(--ink);color:var(--bg);font-size:.88rem;line-height:1.4;text-align:center;text-wrap:pretty;
+  box-shadow:0 12px 34px -10px rgba(0,0,0,.4);transition:opacity .25s,transform .25s var(--ease);
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
 .alertbar{border:1px solid color-mix(in srgb,var(--major) 40%,var(--line));background:color-mix(in srgb,var(--major) 8%,var(--surface));border-radius:12px;padding:11px 14px;font-size:.88rem;margin-bottom:14px}
 
 /* ---------- fichas ---------- */
@@ -250,6 +264,7 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
   <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.6 2.2H4.4z"/><path d="M10 20.4a2.1 2.1 0 0 0 4 0"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
 </svg>
 
@@ -273,7 +288,10 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
 
     <div class="tools">
       <button type="button" class="refresh" id="refresh"><svg class="i"><use href="#i-refresh"/></svg><span id="stamp">Actualizar</span></button>
+      <div class="tools-right">
+      <button type="button" class="bell" id="bell" aria-pressed="false" hidden><svg class="i"><use href="#i-bell"/></svg></button>
       <button type="button" class="btn" id="open-editor"><svg class="i"><use href="#i-sliders"/></svg><span id="mine-label">Mis parques</span><span class="count" id="count" hidden></span></button>
+      </div>
     </div>
 
     <p class="alertbar" id="alertbar" role="status" hidden></p>
@@ -295,6 +313,8 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
 
   </div>
 </div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <dialog id="editor" aria-labelledby="ed-title">
   <div class="sheet-head">
@@ -358,6 +378,13 @@ const T={
   failedHead:'Sin respuesta <em>del Ayuntamiento.</em>',
   fav:'Fijar arriba como favorito',unfav:'Quitar de favoritos',up:'Subir',down:'Bajar',
   share:'Copiar el enlace de este parque',copied:'Enlace copiado',
+  bell:'Avisarme si cambia el estado',bellOn:'Avisos activados. Pulsa para desactivarlos',
+  toastOn:'Avisos activados. Llegarán mientras esta pestaña siga abierta.',toastOff:'Avisos desactivados.',
+  toastDenied:'El navegador tiene bloqueadas las notificaciones de esta página. Permítelas en los ajustes del sitio.',
+  toastUnsupported:'Este navegador no permite avisos desde una página.',
+  nTestTitle:'Avisos activados',nTestBody:'Te avisaré si el Ayuntamiento cierra, reabre o pone un aviso en tus parques.',
+  nShut:n=>`${n}: cerrado`,nOpen:n=>`${n}: abierto de nuevo`,nNotice:n=>`${n}: nuevo aviso`,
+  nOpenBody:'El Ayuntamiento ha levantado el cierre.',nNoticeBody:'El parque sigue abierto.',
   edHelp:'Elige cuáles ver y en qué orden. Los favoritos van siempre primero.',
   edDrag:' En la página también puedes arrastrar las fichas.',
   reset:'Restablecer',done:'Listo',close:'Cerrar',
@@ -389,6 +416,13 @@ const T={
   failedHead:'No answer <em>from the city council.</em>',
   fav:'Pin to the top as a favourite',unfav:'Remove from favourites',up:'Move up',down:'Move down',
   share:'Copy the link to this park',copied:'Link copied',
+  bell:'Notify me when the status changes',bellOn:'Notifications on. Click to turn them off',
+  toastOn:'Notifications on. They arrive while this tab stays open.',toastOff:'Notifications off.',
+  toastDenied:'Your browser is blocking notifications from this page. Allow them in the site settings.',
+  toastUnsupported:'This browser does not allow notifications from a page.',
+  nTestTitle:'Notifications on',nTestBody:'I will tell you if the city council closes, reopens or posts a notice on your parks.',
+  nShut:n=>`${n}: closed`,nOpen:n=>`${n}: open again`,nNotice:n=>`${n}: new notice`,
+  nOpenBody:'The city council has lifted the closure.',nNoticeBody:'The park is still open.',
   edHelp:'Choose which to show and in what order. Favourites always come first.',
   edDrag:' On the page you can also drag the cards.',
   reset:'Reset',done:'Done',close:'Close',
@@ -559,6 +593,54 @@ function flip(root,mutate){
   });
 }
 
+/* ---------- avisos del navegador ---------- */
+/* Sin servidor, quien pregunta es esta página: los avisos solo llegan mientras
+   la pestaña siga abierta (anclada o en segundo plano vale). Por eso se ofrecen
+   solo en ordenador; en el móvil harían falta un service worker y un servidor. */
+const canNotify='Notification' in window&&matchMedia('(hover:hover) and (pointer:fine)').matches;
+let notifyWanted=false;try{notifyWanted=localStorage.getItem('parksNotify')==='1'}catch(e){}
+const notifyOn=()=>canNotify&&notifyWanted&&Notification.permission==='granted';
+function toast(msg){
+  const el=$('#toast');el.textContent=msg;el.classList.add('on');
+  clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),4600);
+}
+function announce(title,body,tag){
+  try{
+    const n=new Notification(title,{body,tag,lang});
+    n.onclick=()=>{window.focus();n.close()};
+    return true;
+  }catch(e){return false}
+}
+/* Lo último que dijo el Ayuntamiento de cada parque. Se compara en cada
+   consulta; la primera solo toma nota. Se avisa de lo que decide la ciudad
+   —cierre, reapertura, aviso nuevo—, no del horario de cada noche. */
+let seen=null;
+function noticeChanges(){
+  const t=T[lang];
+  if(seen&&notifyOn()){
+    for(const p of visible()){
+      const was=seen.get(p.name);
+      if(!was) continue;
+      const detail=[p.schedule&&`${t.window} ${p.schedule}`,p.notes].filter(Boolean).join(' · ');
+      if(was.open!==false&&p.open===false) announce(t.nShut(p.name),detail||t.closedByCity,'park:'+p.name);
+      else if(was.open===false&&p.open===true) announce(t.nOpen(p.name),detail||t.nOpenBody,'park:'+p.name);
+      else if(was.open===true&&p.open===true&&p.code!==1&&(was.code===1||was.tag!==p.tag))
+        announce(t.nNotice(p.name),detail||t.nNoticeBody,'park:'+p.name);
+    }
+  }
+  seen=new Map(parks.map(p=>[p.name,{open:p.open,code:p.code,tag:p.tag}]));
+}
+async function toggleNotify(){
+  const t=T[lang],keep=v=>{notifyWanted=v;try{localStorage.setItem('parksNotify',v?'1':'0')}catch(e){};paintTools()};
+  if(notifyOn()){keep(false);toast(t.toastOff);return}
+  let perm=Notification.permission;
+  if(perm==='default'){try{perm=await Notification.requestPermission()}catch(e){perm='denied'}}
+  if(perm==='default') return;
+  if(perm!=='granted'){toast(t.toastDenied);return}
+  if(!announce(t.nTestTitle,t.nTestBody,'parks:hello')){toast(t.toastUnsupported);return}
+  keep(true);toast(t.toastOn);
+}
+
 /* ---------- pintar ---------- */
 function paintHero(){
   const t=T[lang],head=$('#headline'),sub=$('#sub');
@@ -642,6 +724,9 @@ function paintTools(){
   $('#mine-label').textContent=link?t.seeMine:t.mine;
   if(parks&&!link){const v=visible().length;c.hidden=v===parks.length;c.textContent=`${v}/${parks.length}`}else c.hidden=true;
   const bar=$('#alertbar');bar.hidden=!failed;bar.textContent=t.failed;
+  const bell=$('#bell'),on=notifyOn();
+  bell.hidden=!canNotify;bell.setAttribute('aria-pressed',String(on));
+  bell.title=on?t.bellOn:t.bell;bell.setAttribute('aria-label',on?t.bellOn:t.bell);
 }
 
 function paintEditor(){
@@ -692,6 +777,7 @@ async function load(){
               schedule:clean(a.HORARIO_INCIDENCIA),notes:clean(a.OBSERVACIONES)};
     });
     at=Date.now();failed=false;
+    noticeChanges();
   }catch(e){
     failed=true;
   }finally{
@@ -777,6 +863,7 @@ editor.addEventListener('click',e=>{if(e.target===editor) editor.close()});
 editor.addEventListener('close',()=>{if(stateOfPlay()!==lastPlay) paint()});
 
 $('#refresh').addEventListener('click',load);
+$('#bell').addEventListener('click',toggleNotify);
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden||!at) return;
   if(Date.now()-at>5*6e4) load(); else if(stateOfPlay()!==lastPlay) paint();
@@ -789,7 +876,8 @@ setInterval(()=>{
   /* Si en este rato algún parque ha abierto o cerrado, se repinta todo. */
   if(!drag&&!editor.open&&stateOfPlay()!==lastPlay) paint();
 },30000);
-setInterval(()=>{if(!document.hidden&&!drag) load()},5*6e4);
+/* Con los avisos activados se sigue preguntando aunque la pestaña no se vea. */
+setInterval(()=>{if((!document.hidden||notifyOn())&&!drag) load()},5*6e4);
 
 function setLang(n){
   lang=T[n]?n:'es';
