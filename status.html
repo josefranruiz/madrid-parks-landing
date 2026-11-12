@@ -2,202 +2,308 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Estado de los parques de Madrid</title>
 <meta name="description" content="¿Está abierto el Retiro ahora mismo? Estado en tiempo real de los parques de Madrid, según el parte de alertas del Ayuntamiento.">
-<meta name="theme-color" content="#F7F8F5">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F5F2EA">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0E1311">
+<meta property="og:title" content="Estado de los parques de Madrid">
+<meta property="og:description" content="¿Está abierto el Retiro ahora mismo? El parte del Ayuntamiento, de un vistazo.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E8A57' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 19C5 11 10 6 19 5c0 9-5 14-13 14'/%3E%3Cpath d='M5 19c2-5 5-8 9-10'/%3E%3C/svg%3E">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+@property --tone{syntax:'<color>';inherits:true;initial-value:#197A4C}
+
+*,*::before,*::after{box-sizing:border-box}
+*{margin:0;padding:0}
+[hidden]{display:none!important}
 
 :root{
-  --bg:#F4F6F2;
-  --surface:#FFFFFF;
-  --ink:#16201A;
-  --ink-soft:#5E6B62;
-  --ink-faint:#92A09A;
-  --line:#E2E7DF;
-  --line-soft:#EDF1EA;
-  --accent:#1D7F4E;
+  --bg:#F5F2EA;
+  --surface:#FFFEFA;
+  --ink:#18211C;
+  --ink-2:#56615A;
+  --ink-3:#8E9890;
+  --line:#E3DFD2;
+  --line-2:#ECE8DC;
+  --accent:#1B6B45;
 
-  --open:#2EA55C;
-  --warn:#E0A500;
-  --major:#E07A1F;
-  --alert:#D93B30;
-  --shut:#8A958E;
+  --open:#197A4C;
+  --warn:#946200;
+  --warn-hi:#B87708;
+  --major:#B4530F;
+  --shut:#BC3626;
+  --none:#6F7972;
+  --star:#C98A00;
 
-  --radius:18px;
-  --shadow:0 1px 2px rgba(22,32,26,.04), 0 8px 24px rgba(22,32,26,.05);
+  --lift:0 1px 2px rgba(24,33,28,.05),0 10px 28px -12px rgba(24,33,28,.18);
+  --serif:ui-serif,"New York","Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --ease:cubic-bezier(.2,.7,.2,1);
 }
-
 @media (prefers-color-scheme:dark){
   :root{
-    --bg:#0D110F;
-    --surface:#161B18;
-    --ink:#ECF1EC;
-    --ink-soft:#9BA8A0;
-    --ink-faint:#6B776F;
-    --line:#252D28;
-    --line-soft:#1D2420;
-    --accent:#4FCB86;
+    --bg:#0E1311;
+    --surface:#161C19;
+    --ink:#EDF0EA;
+    --ink-2:#A6B0A8;
+    --ink-3:#6C7770;
+    --line:#27302B;
+    --line-2:#1D2521;
+    --accent:#6FD3A0;
 
-    --open:#3FCB77;
-    --warn:#F0C040;
-    --major:#F2913C;
-    --alert:#FF5A4D;
-    --shut:#78847C;
+    --open:#4CC88A;
+    --warn:#E5B454;
+    --warn-hi:#E5B454;
+    --major:#F0934A;
+    --shut:#FF7A66;
+    --none:#8B958E;
+    --star:#F2C14E;
 
-    --shadow:none;
+    --lift:0 1px 2px rgba(0,0,0,.3),0 14px 30px -14px rgba(0,0,0,.6);
   }
 }
 
 html{-webkit-text-size-adjust:100%}
 body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-  background:var(--bg);color:var(--ink);
-  line-height:1.55;-webkit-font-smoothing:antialiased;
-  font-feature-settings:"tnum" 1;
+  font-family:var(--sans);background:var(--bg);color:var(--ink);
+  line-height:1.5;min-height:100dvh;
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;
 }
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-.wrap{max-width:660px;margin:0 auto;padding:clamp(20px,5vw,56px) 20px 64px}
-
-/* ---------- barra superior ---------- */
-.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
-.brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:.95rem;letter-spacing:-.01em}
-.brand .leaf{font-size:1.15rem;line-height:1}
-.brand a{color:inherit;text-decoration:none}
-select{
-  font:inherit;font-size:.82rem;color:var(--ink-soft);
-  background:var(--surface);border:1px solid var(--line);
-  border-radius:10px;padding:7px 10px;cursor:pointer;
+/* ---------- lienzo ---------- */
+.page{position:relative;--tone:var(--open);transition:--tone .9s ease;overflow:clip}
+/* El halo toma el color del parte: verde si todo va bien, rojo si hay cierre. */
+.aura{
+  position:absolute;inset:0 0 auto;height:640px;pointer-events:none;
+  background:
+    radial-gradient(60% 78% at 6% 0%,color-mix(in srgb,var(--tone) 19%,transparent),transparent 72%),
+    radial-gradient(42% 60% at 100% 0%,color-mix(in srgb,var(--tone) 9%,transparent),transparent 70%);
 }
-select:hover{border-color:var(--ink-faint)}
+.wrap{position:relative;max-width:1140px;margin:0 auto;padding:18px clamp(18px,5vw,44px) 56px}
 
-/* ---------- titular: la respuesta ---------- */
-.verdict{
-  background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--radius);box-shadow:var(--shadow);
-  padding:30px 30px 26px;margin-bottom:14px;position:relative;overflow:hidden;
-}
-.verdict::before{
-  content:"";position:absolute;inset:0 0 auto 0;height:3px;
-  background:var(--tone,var(--open));
-}
-.verdict h1{
-  font-size:clamp(1.75rem,6vw,2.3rem);font-weight:700;
-  letter-spacing:-.025em;line-height:1.12;margin-bottom:8px;
-}
-.verdict .detail{color:var(--ink-soft);font-size:1rem}
-.verdict .detail b{color:var(--ink);font-weight:600}
+/* ---------- cabecera ---------- */
+.mast{display:flex;align-items:center;justify-content:space-between;min-height:44px}
+.brand{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:.95rem;letter-spacing:-.01em;color:inherit;text-decoration:none;border-radius:8px}
+.brand svg{width:20px;height:20px;color:var(--open)}
+.seg{display:inline-flex;padding:3px;border-radius:999px;background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.seg button{min-width:42px;height:30px;padding:0 11px;border-radius:999px;font-size:.74rem;font-weight:650;letter-spacing:.06em;color:var(--ink-2);transition:color .15s,background-color .15s}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+@media (prefers-color-scheme:dark){.seg button[aria-pressed="true"]{background:color-mix(in srgb,var(--ink) 16%,var(--surface))}}
 
-.meta{
-  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-  margin-top:22px;padding-top:18px;border-top:1px solid var(--line-soft);
+/* ---------- portada: la respuesta ---------- */
+.hero{padding:clamp(40px,9vw,104px) 0 clamp(30px,5vw,52px)}
+.eyebrow{display:flex;align-items:center;gap:11px;font-size:.74rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2)}
+.pulse{position:relative;width:8px;height:8px;border-radius:50%;background:var(--tone);flex:none}
+.pulse::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--tone);animation:pulse 2.6s var(--ease) infinite}
+@keyframes pulse{0%{transform:scale(1);opacity:.55}70%,100%{transform:scale(3.2);opacity:0}}
+
+h1{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(2.5rem,7.4vw,5.25rem);line-height:1.02;letter-spacing:-.022em;
+  margin-top:18px;max-width:17ch;text-wrap:balance;
 }
-.stamp{color:var(--ink-faint);font-size:.82rem}
-.stamp.stale{color:var(--major)}
-button{
-  font:inherit;font-size:.84rem;font-weight:500;color:var(--ink-soft);
-  background:transparent;border:1px solid var(--line);border-radius:999px;
-  padding:7px 15px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
-  transition:border-color .15s,color .15s;margin-left:auto;
+h1 em{font-style:italic;color:var(--tone)}
+h1 .who{display:block;font-size:.5em;line-height:1.14;letter-spacing:-.012em;margin-bottom:.22em;max-width:26ch}
+.hero.solo h1{max-width:none}
+.sub{margin-top:18px;font-size:clamp(1rem,1.6vw,1.14rem);color:var(--ink-2);max-width:54ch;text-wrap:pretty}
+.sub b{font-weight:600;color:var(--ink)}
+.link{color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;border-radius:4px}
+
+/* ---------- barra de herramientas ---------- */
+.tools{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);margin-bottom:14px}
+.refresh{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 13px 0 9px;margin-left:-9px;border-radius:999px;color:var(--ink-2);font-size:.85rem;transition:background-color .15s,color .15s}
+.refresh:hover:not(:disabled){background:color-mix(in srgb,var(--ink) 6%,transparent);color:var(--ink)}
+.refresh.stale{color:var(--major)}
+.busy .refresh svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px 0 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:.85rem;font-weight:550;transition:border-color .15s,box-shadow .15s}
+.btn:hover{border-color:var(--ink-3)}
+.btn .count{font-size:.74rem;font-weight:650;color:var(--bg);background:var(--ink);border-radius:999px;padding:1px 7px;margin-right:-4px}
+
+.alertbar{border:1px solid color-mix(in srgb,var(--major) 40%,var(--line));background:color-mix(in srgb,var(--major) 8%,var(--surface));border-radius:12px;padding:11px 14px;font-size:.88rem;margin-bottom:14px}
+
+/* ---------- fichas ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,272px),1fr));gap:12px}
+.tile{
+  position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:10px 10px 16px 18px;--tone:var(--open);--tag:var(--warn);
+  transition:border-color .2s,box-shadow .2s,scale .2s var(--ease);
 }
-button:hover:not(:disabled){border-color:var(--ink-faint);color:var(--ink)}
-button:disabled{opacity:.45;cursor:default}
-.spin{width:11px;height:11px;border:1.5px solid currentColor;border-right-color:transparent;border-radius:50%;display:none}
-body.busy .spin{display:inline-block;animation:sp .6s linear infinite}
-body.busy .glyph{display:none}
-@keyframes sp{to{transform:rotate(360deg)}}
+.tile.unknown{--tone:var(--none)}
+.tile.major{--tag:var(--major)}
+/* Con el orden en manos del usuario, un cierre ya no sube solo: lo carga el color. */
+.tile.shut{--tone:var(--shut);--tag:var(--shut);background:color-mix(in srgb,var(--shut) 8%,var(--surface));border-color:color-mix(in srgb,var(--shut) 36%,var(--line))}
+.tile-top{display:flex;align-items:center;justify-content:space-between;min-height:32px}
+.state{display:inline-flex;align-items:center;gap:9px;font-size:.8rem;font-weight:650;letter-spacing:.012em;color:var(--tone)}
+.state i{width:8px;height:8px;margin:0 3px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3.5px color-mix(in srgb,currentColor 18%,transparent)}
+.tile.shut .state i{position:relative;width:14px;height:14px;margin:0;box-shadow:none}
+.tile.shut .state i::after{content:"";position:absolute;left:3px;right:3px;top:6px;height:2px;border-radius:1px;background:var(--surface)}
+.name{font-family:var(--serif);font-weight:500;font-size:1.24rem;line-height:1.18;letter-spacing:-.01em;margin-top:3px;padding-right:8px;text-wrap:balance}
+.note{margin-top:9px;font-size:.86rem;line-height:1.45;color:var(--ink-2);padding-right:8px;text-wrap:pretty}
+.tag{font-weight:650;color:var(--tone)}
+.pill{font-size:.72rem;font-weight:650;letter-spacing:.02em;color:var(--tag);background:color-mix(in srgb,var(--tag) 13%,transparent);border-radius:999px;padding:2px 9px;margin-left:1px}
+.dotsep{color:var(--ink-3);margin:0 .4em}
+.nb{white-space:nowrap}
 
-/* ---------- aviso de error ---------- */
-.alertbar{
-  display:none;background:var(--surface);border:1px solid var(--line);
-  border-left:3px solid var(--major);border-radius:12px;
-  padding:13px 16px;font-size:.88rem;color:var(--ink-soft);margin-bottom:14px;
+.star{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--ink-3);transition:color .15s,opacity .15s,background-color .15s}
+.star:hover{color:var(--star);background:color-mix(in srgb,var(--star) 12%,transparent)}
+.star[aria-pressed="true"]{color:var(--star)}
+.star[aria-pressed="true"] svg{fill:currentColor}
+@media (hover:hover) and (pointer:fine){
+  .tile{cursor:grab}
+  .tile:hover{border-color:color-mix(in srgb,var(--tone) 30%,var(--ink-3));box-shadow:var(--lift)}
+  .tile .star{opacity:0}
+  .tile:hover .star,.tile .star:focus-visible,.tile .star[aria-pressed="true"]{opacity:1}
 }
-.alertbar.on{display:block}
+.tile.dragging{z-index:2;scale:1.03;box-shadow:var(--lift);border-color:var(--accent)}
+.sorting,.sorting *{cursor:grabbing!important;user-select:none;-webkit-user-select:none}
 
-/* ---------- lista ---------- */
-.group-label{
-  font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--ink-faint);margin:26px 0 10px 4px;
+.tile.sk{pointer-events:none;cursor:default}
+.sk .bar{height:12px;border-radius:6px;background:color-mix(in srgb,var(--ink) 8%,transparent);animation:breathe 1.4s ease-in-out infinite}
+.sk .bar.a{width:64px;margin:10px 0 14px}
+.sk .bar.b{width:72%;height:18px;margin-bottom:6px}
+@keyframes breathe{50%{opacity:.45}}
+
+/* ---------- pie ---------- */
+footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:18px 40px;font-size:.82rem;color:var(--ink-2)}
+footer p{max-width:60ch;text-wrap:pretty}
+footer nav{display:flex;flex-direction:column;gap:6px;text-align:right}
+footer a{color:var(--accent);text-decoration:none;font-weight:550;border-radius:4px}
+footer a:hover{text-decoration:underline;text-underline-offset:3px}
+
+/* ---------- Mis parques ---------- */
+dialog{
+  margin:auto;border:0;padding:0;color:var(--ink);background:var(--surface);
+  width:min(460px,calc(100vw - 32px));max-height:min(720px,calc(100dvh - 48px));
+  border-radius:22px;box-shadow:0 24px 80px -20px rgba(0,0,0,.45),0 0 0 1px var(--line);
+  overflow:hidden;
 }
-.park{
-  background:var(--surface);border:1px solid var(--line);
-  border-radius:14px;margin-bottom:8px;
-  padding:16px 18px 16px 21px;position:relative;overflow:hidden;
-  transition:border-color .15s;
+dialog[open]{display:flex;flex-direction:column;animation:pop .26s var(--ease)}
+dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:fade .2s}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.985)}}
+@keyframes fade{from{opacity:0}}
+.sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 14px 12px 22px}
+.sheet-head h2{font-family:var(--serif);font-weight:500;font-size:1.5rem;letter-spacing:-.012em;line-height:1.15}
+.sheet-head p{margin-top:5px;font-size:.86rem;color:var(--ink-2);text-wrap:pretty}
+.fine-only{display:none}
+@media (hover:hover) and (pointer:fine){.fine-only{display:inline}}
+.ib{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none;color:var(--ink-2);transition:background-color .15s,color .15s,opacity .15s}
+.ib:hover:not(:disabled){background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--ink)}
+.ib:disabled{opacity:.22}
+.ib.star{color:var(--ink-3)}
+.ib.star:hover{color:var(--star);background:color-mix(in srgb,var(--star) 12%,transparent)}
+.ib.star[aria-pressed="true"]{color:var(--star)}
+
+.picks{list-style:none;overflow:auto;padding:2px 10px 8px;flex:1;overscroll-behavior:contain}
+.picks li{display:flex;align-items:center;gap:2px;padding:3px 2px 3px 0;border-radius:12px;background:var(--surface)}
+.picks li.rest{margin-top:8px;padding-top:11px;border-top:1px solid var(--line);border-radius:0 0 12px 12px}
+.pick{display:flex;align-items:center;gap:12px;flex:1;min-width:0;padding:8px 6px 8px 12px;border-radius:10px;cursor:pointer}
+.pick input{position:absolute;opacity:0;pointer-events:none}
+.box{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--ink-3);display:grid;place-items:center;flex:none;transition:background-color .15s,border-color .15s}
+.box svg{width:14px;height:14px;stroke-width:2.4;color:var(--surface);opacity:0}
+.pick input:checked+.box{background:var(--open);border-color:var(--open)}
+.pick input:checked+.box svg{opacity:1}
+.pick input:focus-visible+.box{outline:2px solid var(--accent);outline-offset:2px}
+.nm{font-size:.95rem;font-weight:550;line-height:1.25;letter-spacing:-.005em;transition:color .15s}
+.picks li.off .nm{color:var(--ink-3);font-weight:450}
+
+.sheet-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.ghost{height:40px;padding:0 12px;border-radius:999px;color:var(--ink-2);font-size:.88rem;font-weight:550}
+.ghost:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.primary{height:40px;padding:0 22px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:.9rem;font-weight:600;transition:opacity .15s}
+.primary:hover{opacity:.86}
+
+@media (max-width:560px){
+  .hero{padding-top:36px}
+  footer{grid-template-columns:1fr}
+  footer nav{flex-direction:row;flex-wrap:wrap;gap:6px 18px;text-align:left}
+  dialog{margin:auto 0 0;width:100%;max-width:100%;max-height:88dvh;border-radius:22px 22px 0 0}
+  @keyframes pop{from{transform:translateY(40px);opacity:0}}
+  .sheet-head{padding-left:20px}
+  .picks{padding-inline:6px}
+  .pick{padding-left:14px;gap:11px}
 }
-.park::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tone)}
-.park.calm{padding-top:13px;padding-bottom:13px}
-
-.row{display:flex;align-items:flex-start;gap:11px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--tone);flex:none;margin-top:7px;
-     box-shadow:0 0 0 3.5px color-mix(in srgb,var(--tone) 18%,transparent)}
-.name{font-weight:600;font-size:.98rem;letter-spacing:-.012em;flex:1;min-width:0}
-.state{font-size:.78rem;font-weight:600;white-space:nowrap;letter-spacing:.01em;flex:none;margin-top:2px}
-.state.is-open{color:var(--open)}
-.state.is-shut{color:var(--shut)}
-
-.note{margin-top:7px;padding-left:19px;font-size:.85rem;color:var(--ink-soft)}
-.note b{font-weight:600;color:var(--ink)}
-.note .tag{font-weight:600;color:var(--tone)}
-.note .sep{color:var(--ink-faint);margin:0 6px}
-
-.placeholder{color:var(--ink-faint);text-align:center;padding:56px 20px;font-size:.95rem}
-
-footer{
-  margin-top:34px;padding-top:22px;border-top:1px solid var(--line-soft);
-  color:var(--ink-faint);font-size:.8rem;line-height:1.9;text-align:center;
-}
-footer a{color:var(--accent);text-decoration:none}
-footer a:hover{text-decoration:underline}
-footer .sep{margin:0 7px;opacity:.5}
-
-@media (max-width:520px){
-  .verdict{padding:24px 22px 22px}
-  .park{padding:14px 15px 14px 18px}
-  .row{gap:10px}
-  .state{font-size:.74rem}
-  button{margin-left:0}
-  .meta{gap:10px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <div class="top">
-    <div class="brand"><span class="leaf">🌳</span><a href="index.html" data-k="brand">Madrid Parks</a></div>
-    <select id="lang" onchange="setLang(this.value)" aria-label="Idioma / Language">
-      <option value="es">Español</option>
-      <option value="en">English</option>
-    </select>
-  </div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19C5 11 10 6 19 5c0 9-5 14-13 14"/><path d="M5 19c2-5 5-8 9-10"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.6"/><circle cx="8" cy="17" r="2.6"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+</svg>
 
-  <section class="verdict" id="verdict">
-    <h1 id="headline" data-k="loading">Consultando…</h1>
-    <p class="detail" id="detail"></p>
-    <div class="meta">
-      <span class="stamp" id="stamp"></span>
-      <button id="refresh" type="button">
-        <span class="spin" aria-hidden="true"></span><span class="glyph" aria-hidden="true">↻</span>
-        <span data-k="refresh">Actualizar</span>
-      </button>
+<div class="page" id="page">
+  <div class="aura" aria-hidden="true"></div>
+  <div class="wrap">
+
+    <header class="mast">
+      <a class="brand" href="index.html"><svg class="i"><use href="#i-leaf"/></svg>Madrid Parks</a>
+      <div class="seg" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="es" aria-pressed="true" aria-label="Español">ES</button>
+        <button type="button" data-lang="en" aria-pressed="false" aria-label="English">EN</button>
+      </div>
+    </header>
+
+    <section class="hero" id="hero" aria-live="polite">
+      <p class="eyebrow"><span class="pulse" aria-hidden="true"></span><span id="dateline">Madrid</span></p>
+      <h1 id="headline">Consultando el parte…</h1>
+      <p class="sub" id="sub"></p>
+    </section>
+
+    <div class="tools">
+      <button type="button" class="refresh" id="refresh"><svg class="i"><use href="#i-refresh"/></svg><span id="stamp">Actualizar</span></button>
+      <button type="button" class="btn" id="open-editor"><svg class="i"><use href="#i-sliders"/></svg><span data-k="mine">Mis parques</span><span class="count" id="count" hidden></span></button>
     </div>
-  </section>
 
-  <div class="alertbar" id="alertbar" role="status"></div>
+    <p class="alertbar" id="alertbar" role="status" hidden></p>
 
-  <main id="list" aria-live="polite"></main>
+    <main class="grid" id="grid"></main>
 
-  <footer>
-    <span data-k="source">Datos del parte de alertas del Ayuntamiento de Madrid.</span><br>
-    <a href="index.html" data-k="home">Inicio</a><span class="sep">·</span>
-    <a href="https://apps.apple.com/us/app/madrid-parks/id6748036225" data-k="app">App para iPhone</a><span class="sep">·</span>
-    <a href="privacy.html" data-k="privacy">Privacidad</a>
-  </footer>
+    <noscript><p class="alertbar">Esta página necesita JavaScript para consultar el parte del Ayuntamiento.</p></noscript>
 
+    <footer>
+      <div>
+        <p data-k="footnote"></p>
+      </div>
+      <nav>
+        <a href="index.html" data-k="home">Inicio</a>
+        <a href="https://apps.apple.com/us/app/madrid-parks/id6748036225" data-k="app">App para iPhone</a>
+        <a href="privacy.html" data-k="privacy">Privacidad</a>
+      </nav>
+    </footer>
+
+  </div>
 </div>
+
+<dialog id="editor" aria-labelledby="ed-title">
+  <div class="sheet-head">
+    <div>
+      <h2 id="ed-title" data-k="mine">Mis parques</h2>
+      <p><span data-k="edHelp"></span><span class="fine-only" data-k="edDrag"></span></p>
+    </div>
+    <button type="button" class="ib" id="ed-close" data-ka="close" aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button>
+  </div>
+  <ol class="picks" id="picks"></ol>
+  <div class="sheet-foot">
+    <button type="button" class="ghost" id="ed-reset" data-k="reset">Restablecer</button>
+    <button type="button" class="primary" id="ed-done" data-k="done">Listo</button>
+  </div>
+</dialog>
 
 <script>
 (()=>{
@@ -206,63 +312,110 @@ footer .sep{margin:0 7px;opacity:.5}
 const API='https://sigma.madrid.es/hosted/rest/services/MEDIO_AMBIENTE/ALERTAS_PARQUES/MapServer/0/query'
   +'?f=json&where=1%3D1&outFields=*&returnGeometry=false';
 
-/* Mismo mapa que STATUS_MAPPING en la app.
-   open: ¿puedo entrar?   rank: gravedad, lo peor primero. */
+/* Mismo mapa que STATUS_MAPPING en la app. open: ¿puedo entrar?
+   tag: la palabra del código, solo cuando añade algo a "abierto/cerrado". */
 const S={
- 0:{k:'closed', open:false, tone:'var(--shut)',  rank:2},
- 1:{k:'normal', open:true,  tone:'var(--open)',  rank:5},
- 2:{k:'unknown',open:null,  tone:'var(--shut)',  rank:4},
- 3:{k:'warning',open:true,  tone:'var(--warn)',  rank:3},
- 4:{k:'major',  open:true,  tone:'var(--major)', rank:1},
- 5:{k:'alert',  open:false, tone:'var(--alert)', rank:0},
- 6:{k:'closed', open:false, tone:'var(--shut)',  rank:2}
+ 0:{open:false},
+ 1:{open:true},
+ 2:{open:null},
+ 3:{open:true, tag:'warning'},
+ 4:{open:true, tag:'major'},
+ 5:{open:false,tag:'alert'},
+ 6:{open:false}
 };
-const UNK=S[2];
-/* La pastilla del código solo cuando añade algo: con 0 y 6 repetiría
-   "Cerrado", y con 1 no hay nada que contar. */
-const CODE={2:'unknown',3:'warning',4:'major',5:'alert'};
 
 const T={
- es:{brand:'Madrid Parks',refresh:'Actualizar',loading:'Consultando…',
-  open:'Abierto',closed:'Cerrado',
-  unknown:'Sin datos',warning:'Aviso',major:'Incidencia',alert:'Alerta',
-  allClear:'Todo abierto',allClearSub:n=>`Los ${n} parques están abiertos y sin incidencias.`,
-  someWarn:n=>n===1?'Un parque con aviso':`${n} parques con aviso`,
-  someWarnSub:'Se puede entrar, pero el Ayuntamiento ha comunicado algo.',
-  someShut:n=>n===1?'Un parque cerrado':`${n} parques cerrados`,
-  shutList:names=>`Cerrado: <b>${names}</b>.`,
-  schedule:'Horario',notes:'Observaciones',restricted:'Horario reducido',
-  closedByCity:'Cerrado por el Ayuntamiento',
-  needAttention:'Con algo que contar',fine:'Sin novedad',
-  source:'Datos del parte de alertas del Ayuntamiento de Madrid.',
-  home:'Inicio',app:'App para iPhone',privacy:'Privacidad',
-  now:'actualizado hace un momento',min:'actualizado hace 1 minuto',
-  mins:n=>`actualizado hace ${n} minutos`,hour:'actualizado hace 1 hora',hours:n=>`actualizado hace ${n} horas`,
+ es:{title:'Estado de los parques de Madrid',mine:'Mis parques',
+  open:'Abierto',closed:'Cerrado',nodata:'Sin datos',
+  warning:'Aviso',major:'Incidencia',alert:'Alerta',
+  loading:'Consultando el parte…',
+  allClear:'Todo <em>abierto.</em>',
+  allClearSub:(n,all)=>all?`Los ${n} parques, sin incidencias.`:`Tus ${n} parques, sin incidencias.`,
+  warnHead:n=>`Todo abierto, <em>con ${n===1?'un aviso':n+' avisos'}.</em>`,
+  warnSub:n=>`Se puede entrar en todos, pero ${n===1?'uno tiene':n+' tienen'} un aviso del Ayuntamiento.`,
+  shutHead:n=>n===1?'Hay <em>un parque cerrado.</em>':`Hay <em>${n} parques cerrados.</em>`,
+  shutSub:(names,w)=>`Cerrado: <b>${names}</b>.`+(w?` ${w===1?'Otro':'Otros '+w} con aviso.`:''),
+  soloOpen:'Abierto.',soloWarn:'Abierto, con aviso.',soloShut:'Cerrado.',soloNone:'Sin datos.',
+  soloCalm:'Sin incidencias comunicadas por el Ayuntamiento.',
+  noneHead:'Ningún parque <em>elegido.</em>',noneSub:'Elige qué parques quieres ver',
+  restricted:'Horario reducido',closedByCity:'Cerrado por el Ayuntamiento',
+  refresh:'Actualizar',now:'Actualizado ahora',mins:n=>`Actualizado hace ${n} min`,hours:n=>`Actualizado hace ${n} h`,
   failed:'No se ha podido consultar al Ayuntamiento. Inténtalo de nuevo en un momento.',
-  failedTitle:'Sin conexión con el Ayuntamiento'},
- en:{brand:'Madrid Parks',refresh:'Refresh',loading:'Checking…',
-  open:'Open',closed:'Closed',
-  unknown:'No data',warning:'Notice',major:'Incident',alert:'Alert',
-  allClear:'All open',allClearSub:n=>`All ${n} parks are open, with nothing reported.`,
-  someWarn:n=>n===1?'One park with a notice':`${n} parks with a notice`,
-  someWarnSub:'You can go in, but the city council has reported something.',
-  someShut:n=>n===1?'One park closed':`${n} parks closed`,
-  shutList:names=>`Closed: <b>${names}</b>.`,
-  schedule:'Hours',notes:'Notes',restricted:'Reduced hours',
-  closedByCity:'Closed by the city council',
-  needAttention:'Something reported',fine:'Nothing reported',
-  source:'Data from the Madrid city council alert feed.',
-  home:'Home',app:'iPhone app',privacy:'Privacy',
-  now:'updated just now',min:'updated 1 minute ago',
-  mins:n=>`updated ${n} minutes ago`,hour:'updated 1 hour ago',hours:n=>`updated ${n} hours ago`,
+  failedHead:'Sin respuesta <em>del Ayuntamiento.</em>',
+  fav:'Fijar arriba como favorito',unfav:'Quitar de favoritos',up:'Subir',down:'Bajar',show:'Mostrar',
+  edHelp:'Elige cuáles ver y en qué orden. Los favoritos van siempre primero.',
+  edDrag:' En la página también puedes arrastrar las fichas.',
+  reset:'Restablecer',done:'Listo',close:'Cerrar',
+  footnote:'Datos del parte de alertas del Ayuntamiento de Madrid. «Abierto» significa que el Ayuntamiento no ha cerrado el parque; no tiene en cuenta el horario de cada recinto. La app sí.',
+  home:'Inicio',app:'App para iPhone',privacy:'Privacidad'},
+ en:{title:'Madrid parks status',mine:'My parks',
+  open:'Open',closed:'Closed',nodata:'No data',
+  warning:'Notice',major:'Incident',alert:'Alert',
+  loading:'Checking the report…',
+  allClear:'All <em>open.</em>',
+  allClearSub:(n,all)=>all?`All ${n} parks, nothing reported.`:`Your ${n} parks, nothing reported.`,
+  warnHead:n=>`All open, <em>with ${n===1?'one notice':n+' notices'}.</em>`,
+  warnSub:n=>`You can go into all of them, but ${n===1?'one has':n+' have'} a notice from the city council.`,
+  shutHead:n=>n===1?'<em>One park is closed.</em>':`<em>${n} parks are closed.</em>`,
+  shutSub:(names,w)=>`Closed: <b>${names}</b>.`+(w?` ${w} more with a notice.`:''),
+  soloOpen:'Open.',soloWarn:'Open, with a notice.',soloShut:'Closed.',soloNone:'No data.',
+  soloCalm:'Nothing reported by the city council.',
+  noneHead:'No parks <em>selected.</em>',noneSub:'Choose the parks you want to see',
+  restricted:'Reduced hours',closedByCity:'Closed by the city council',
+  refresh:'Refresh',now:'Updated just now',mins:n=>`Updated ${n} min ago`,hours:n=>`Updated ${n} h ago`,
   failed:'Could not reach the city council. Try again in a moment.',
-  failedTitle:'No answer from the city council'}
+  failedHead:'No answer <em>from the city council.</em>',
+  fav:'Pin to the top as a favourite',unfav:'Remove from favourites',up:'Move up',down:'Move down',show:'Show',
+  edHelp:'Choose which to show and in what order. Favourites always come first.',
+  edDrag:' On the page you can also drag the cards.',
+  reset:'Reset',done:'Done',close:'Close',
+  footnote:'Data from the Madrid city council alert feed. “Open” means the council has not closed the park; it does not account for each park’s opening hours. The app does.',
+  home:'Home',app:'iPhone app',privacy:'Privacy'}
 };
 
-let lang='es', parks=null, at=null;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const icon=n=>`<svg class="i" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const EASE='cubic-bezier(.2,.7,.2,1)';
+const calmMotion=matchMedia('(prefers-reduced-motion: reduce)');
 
+const page=$('#page'), grid=$('#grid'), picks=$('#picks'), editor=$('#editor');
+let lang='es', parks=null, at=null, failed=false;
+
+/* ---------- preferencias: qué parques, en qué orden, cuáles fijados ---------- */
+let prefs={order:[],hidden:[],fav:[]};
+try{
+  const raw=JSON.parse(localStorage.getItem('parksPrefs')||'null');
+  if(raw) for(const k of Object.keys(prefs)) if(Array.isArray(raw[k])) prefs[k]=raw[k].filter(v=>typeof v==='string');
+}catch(e){}
+const save=()=>{try{localStorage.setItem('parksPrefs',JSON.stringify(prefs))}catch(e){}};
+const isFav=n=>prefs.fav.includes(n), isHidden=n=>prefs.hidden.includes(n);
+
+/* Sin nada guardado: el Retiro primero —es por el que pregunta casi todo el
+   mundo— y el resto por orden alfabético. */
+const byDefault=(a,b)=>(/retiro/i.test(b.name)-/retiro/i.test(a.name))||a.name.localeCompare(b.name,'es');
+
+/* El orden efectivo: el del usuario, con los favoritos siempre delante. */
+function ordered(){
+  const pos=n=>{const i=prefs.order.indexOf(n);return i<0?Infinity:i};
+  const base=[...parks].sort((a,b)=>{const x=pos(a.name),y=pos(b.name);return x!==y?(x<y?-1:1):byDefault(a,b)});
+  return [...base.filter(p=>isFav(p.name)),...base.filter(p=>!isFav(p.name))];
+}
+const visible=()=>ordered().filter(p=>!isHidden(p.name));
+/* Antes de tocar el orden se escribe entero, para que cada parque tenga sitio. */
+const pinOrder=()=>{prefs.order=ordered().map(p=>p.name)};
+
+function commit(){save();paint()}
+function toggleFav(n){prefs.fav=isFav(n)?prefs.fav.filter(x=>x!==n):[...prefs.fav,n];commit()}
+function toggleHidden(n){prefs.hidden=isHidden(n)?prefs.hidden.filter(x=>x!==n):[...prefs.hidden,n];commit()}
+function move(n,dir){
+  pinOrder();
+  const o=prefs.order,i=o.indexOf(n),j=i+dir;
+  if(i<0||j<0||j>=o.length||isFav(o[i])!==isFav(o[j])) return;
+  [o[i],o[j]]=[o[j],o[i]];commit();
+}
+
+/* ---------- textos ---------- */
 /* El servicio trae horas imposibles: el 12/11/2026 el Retiro venía con
    "00:60 a 21:00". No se corrige —no sabemos si era 00:00 o 06:00— se marca. */
 function clean(v){
@@ -272,72 +425,145 @@ function clean(v){
   return t.replace(/\s+a\s+/gi,' – ').replace(/\b24:00\b/g,'00:00')
     .replace(/\b(\d{1,2}):(\d{2})\b/g,(o,h,m)=>(+h>23||+m>59)?`${o} (sic)`:o);
 }
-
 function ago(){
-  const t=T[lang], m=Math.round((Date.now()-at)/6e4);
-  if(m<1) return t.now; if(m===1) return t.min; if(m<60) return t.mins(m);
-  const h=Math.round(m/60); return h===1?t.hour:t.hours(h);
+  const t=T[lang],m=Math.round((Date.now()-at)/6e4);
+  if(m<1) return t.now; if(m<60) return t.mins(m);
+  return t.hours(Math.round(m/60));
+}
+function dateline(){
+  const d=new Intl.DateTimeFormat(lang==='en'?'en-GB':'es-ES',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Madrid'}).format(new Date());
+  return `Madrid · ${d}`;
+}
+/* Lo que el Ayuntamiento cuenta de un parque. La fecha llega todos los días
+   aunque no pase nada, así que no cuenta como incidencia. */
+function story(p,withTag){
+  const t=T[lang],bits=[];
+  if(withTag&&p.tag) bits.push(`<span class="tag">${esc(t[p.tag])}</span>`);
+  if(p.schedule) bits.push(`${esc(t.restricted)} <span class="nb">${esc(p.schedule)}</span>`);
+  if(p.notes) bits.push(esc(p.notes));
+  if(p.open===false&&!p.schedule&&!p.notes) bits.push(esc(t.closedByCity));
+  return bits;
+}
+const DOT='<span class="dotsep">·</span>';
+const isShut=p=>p.open===false;
+const hasNotice=p=>p.open!==false&&p.code!==1;
+
+/* ---------- animación: cada ficha viaja de donde estaba a donde queda ---------- */
+function flip(root,mutate){
+  const before=new Map();
+  root.querySelectorAll('[data-key]').forEach(el=>before.set(el.dataset.key,el.getBoundingClientRect()));
+  mutate();
+  if(calmMotion.matches) return;
+  const fresh=before.size===0;
+  [...root.querySelectorAll('[data-key]')].forEach((el,i)=>{
+    const a=before.get(el.dataset.key);
+    if(!a){
+      el.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],
+        {duration:420,easing:EASE,delay:fresh?i*38:0,fill:'backwards'});
+      return;
+    }
+    const b=el.getBoundingClientRect(),dx=a.left-b.left,dy=a.top-b.top;
+    if(dx||dy) el.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:300,easing:EASE});
+  });
 }
 
-function paint(){
-  if(!parks) return;
-  const t=T[lang];
-  const shut=parks.filter(p=>p.open===false);
-  const warn=parks.filter(p=>p.open!==false&&p.code!==1);
-
-  /* El titular ES la respuesta, y el tono del borde la refuerza. */
-  let head,sub,tone;
-  if(shut.length){ head=t.someShut(shut.length); sub=t.shutList(shut.map(p=>esc(p.name)).join(', ')); tone='var(--alert)'; }
-  else if(warn.length){ head=t.someWarn(warn.length); sub=t.someWarnSub; tone='var(--warn)'; }
-  else { head=t.allClear; sub=t.allClearSub(parks.length); tone='var(--open)'; }
-
-  $('#headline').textContent=head;
-  $('#detail').innerHTML=sub;
-  $('#verdict').style.setProperty('--tone',tone);
-  const stale=Date.now()-at>20*6e4;
-  $('#stamp').className='stamp'+(stale?' stale':'');
-  $('#stamp').textContent=ago();
-
-  /* Dos grupos: lo que pide atención arriba, lo tranquilo abajo y en silencio. */
-  const busy=parks.filter(p=>p.code!==1).sort((a,b)=>a.rank-b.rank||a.name.localeCompare(b.name,'es'));
-  const calm=parks.filter(p=>p.code===1).sort((a,b)=>a.name.localeCompare(b.name,'es'));
-
-  const card=(p,quiet)=>{
-    const code=CODE[p.code];
-    const shut=p.open===false;
-
-    /* A la derecha, solo la respuesta: abierto o cerrado. Una columna binaria
-       se recorre con la vista; metiendo ahí también el código, los nombres
-       largos se quedaban sin sitio y la fila se descuadraba. */
-    const state=`<span class="state ${shut?'is-shut':'is-open'}">${esc(shut?t.closed:t.open)}</span>`;
-
-    /* El código y su explicación van juntos abajo, en una línea discreta.
-       Nada de recuadros. La fecha llega todos los días aunque no pase nada,
-       así que por sí sola no cuenta como incidencia. */
-    const bits=[];
-    if(code) bits.push(`<span class="tag">${esc(t[code])}</span>`);
-    if(p.schedule) bits.push(`<span><b>${esc(t.restricted)}:</b> ${esc(p.schedule)}</span>`);
-    if(p.notes) bits.push(`<span>${esc(p.notes)}</span>`);
-    if(shut&&!p.schedule&&!p.notes) bits.push(`<span>${esc(t.closedByCity)}</span>`);
-
-    return `<article class="park${quiet?' calm':''}" style="--tone:${p.tone}">
-      <div class="row">
-        <span class="dot" aria-hidden="true"></span>
-        <span class="name">${esc(p.name)}</span>
-        ${state}
-      </div>
-      ${bits.length?`<div class="note"><span class="line">${bits.join('<span class="sep">·</span>')}</span></div>`:''}
-    </article>`;
-  };
-
-  let html='';
-  if(busy.length) html+=`<p class="group-label">${esc(t.needAttention)}</p>`+busy.map(p=>card(p,false)).join('');
-  if(calm.length) html+=`<p class="group-label">${esc(t.fine)}</p>`+calm.map(p=>card(p,true)).join('');
-  $('#list').innerHTML=html;
+/* ---------- pintar ---------- */
+function paintHero(){
+  const t=T[lang],hero=$('#hero'),head=$('#headline'),sub=$('#sub');
+  $('#dateline').textContent=dateline();
+  hero.classList.remove('solo');
+  if(!parks){
+    head.innerHTML=failed?t.failedHead:esc(t.loading);
+    sub.textContent='';
+    page.style.setProperty('--tone',failed?'var(--major)':'var(--none)');
+    return;
+  }
+  const v=visible(),shut=v.filter(isShut),warn=v.filter(hasNotice);
+  let h,s,tone;
+  if(!v.length){
+    h=t.noneHead;s=`<button type="button" class="link" data-open-editor>${esc(t.noneSub)}</button>`;tone='var(--none)';
+  }else if(v.length===1){
+    /* Un solo parque: la portada entera es la respuesta. */
+    const p=v[0];
+    const word=isShut(p)?t.soloShut:p.open===null?t.soloNone:p.code===1?t.soloOpen:t.soloWarn;
+    hero.classList.add('solo');
+    h=`<span class="who">${esc(p.name)}</span><em>${esc(word)}</em>`;
+    s=story(p,false).join(DOT)||esc(t.soloCalm);
+    tone=isShut(p)?'var(--shut)':p.open===null?'var(--none)':p.tag==='major'?'var(--major)':p.code===1?'var(--open)':'var(--warn-hi)';
+  }else if(shut.length){
+    h=t.shutHead(shut.length);s=t.shutSub(shut.map(p=>esc(p.name)).join(', '),warn.length);tone='var(--shut)';
+  }else if(warn.length){
+    h=t.warnHead(warn.length);s=esc(t.warnSub(warn.length));tone='var(--warn-hi)';
+  }else{
+    h=t.allClear;s=esc(t.allClearSub(v.length,v.length===parks.length));tone='var(--open)';
+  }
+  head.innerHTML=h;sub.innerHTML=s;
+  page.style.setProperty('--tone',tone);
 }
 
+function tile(p){
+  const t=T[lang],shut=isShut(p),none=p.open===null,fav=isFav(p.name),note=story(p,false).join('<br>');
+  const cls=['tile',shut?'shut':'',none?'unknown':'',p.tag==='major'?'major':''].filter(Boolean).join(' ');
+  return `<article class="${cls}" data-key="${esc(p.name)}">
+    <div class="tile-top">
+      <span class="state"><i aria-hidden="true"></i>${esc(shut?t.closed:none?t.nodata:t.open)}${p.tag?`<span class="pill">${esc(t[p.tag])}</span>`:''}</span>
+      <button type="button" class="star" aria-pressed="${fav}" aria-label="${esc(fav?t.unfav:t.fav)}" title="${esc(fav?t.unfav:t.fav)}">${icon('star')}</button>
+    </div>
+    <h2 class="name">${esc(p.name)}</h2>
+    ${note?`<p class="note">${note}</p>`:''}
+  </article>`;
+}
+const skeleton=()=>Array.from({length:6},()=>'<article class="tile sk" aria-hidden="true"><div class="bar a"></div><div class="bar b"></div></article>').join('');
+
+function paintGrid(){
+  if(!parks){grid.innerHTML=failed?'':skeleton();return}
+  const v=visible();
+  /* Con uno solo ya lo ha dicho la portada. */
+  flip(grid,()=>{grid.innerHTML=v.length>1?v.map(tile).join(''):''});
+  grid.hidden=v.length<=1;
+}
+
+function paintTools(){
+  const t=T[lang],stamp=$('#stamp'),btn=$('#refresh');
+  stamp.textContent=at?ago():t.refresh;
+  btn.classList.toggle('stale',!!at&&Date.now()-at>20*6e4);
+  btn.title=t.refresh;
+  const c=$('#count');
+  if(parks){const v=visible().length;c.hidden=v===parks.length;c.textContent=`${v}/${parks.length}`}else c.hidden=true;
+  const bar=$('#alertbar');bar.hidden=!failed;bar.textContent=t.failed;
+}
+
+function paintEditor(){
+  if(!editor.open||!parks) return;
+  const t=T[lang],list=ordered();
+  /* Se repinta entero, así que el foco hay que devolverlo a mano. */
+  const f=document.activeElement,fk=f?.closest?.('li')?.dataset.key,fr=f?.dataset?.role;
+  flip(picks,()=>{
+    picks.innerHTML=list.map((p,i)=>{
+      const n=p.name,fav=isFav(n),off=isHidden(n);
+      const up=i>0&&isFav(list[i-1].name)===fav,down=i<list.length-1&&isFav(list[i+1].name)===fav;
+      const rest=!fav&&i>0&&isFav(list[i-1].name);
+      return `<li data-key="${esc(n)}" class="${off?'off':''}${rest?' rest':''}">
+        <label class="pick"><input type="checkbox" data-role="vis" ${off?'':'checked'}><span class="box" aria-hidden="true">${icon('check')}</span><span class="nm">${esc(n)}</span></label>
+        <button type="button" class="ib star" data-role="star" aria-pressed="${fav}" aria-label="${esc(fav?t.unfav:t.fav)}" title="${esc(fav?t.unfav:t.fav)}">${icon('star')}</button>
+        <button type="button" class="ib" data-role="up" ${up?'':'disabled'} aria-label="${esc(t.up)}" title="${esc(t.up)}">${icon('up')}</button>
+        <button type="button" class="ib" data-role="down" ${down?'':'disabled'} aria-label="${esc(t.down)}" title="${esc(t.down)}">${icon('down')}</button>
+      </li>`;
+    }).join('');
+  });
+  if(fk&&fr){
+    const li=[...picks.children].find(el=>el.dataset.key===fk);
+    const want=li?.querySelector(`[data-role="${fr}"]`);
+    const alt=li?.querySelector(`[data-role="${fr==='up'?'down':'up'}"]`);
+    (want&&!want.disabled?want:alt&&!alt.disabled?alt:li?.querySelector('[data-role="star"]'))?.focus();
+  }
+}
+
+function paint(){paintHero();paintGrid();paintTools();paintEditor()}
+
+/* ---------- datos ---------- */
 async function load(){
-  document.body.classList.add('busy'); $('#refresh').disabled=true;
+  document.body.classList.add('busy');$('#refresh').disabled=true;
   try{
     /* El servicio devuelve CORS para cualquier origen y acepta GET, así que
        esta página estática habla con él directamente. Sin backend. */
@@ -345,48 +571,101 @@ async function load(){
     if(!r.ok) throw new Error('HTTP '+r.status);
     const d=await r.json();
     if(!Array.isArray(d.features)) throw new Error('respuesta inesperada');
-
     parks=d.features.map(f=>{
-      const a=f.attributes||{}, c=Number.parseInt(a.ALERTA_DESCRIPCION,10);
-      const st=Number.isNaN(c)?UNK:(S[c]||UNK);
-      return {name:String(a.ZONA_VERDE||'—').trim(),code:Number.isNaN(c)?null:c,...st,
+      const a=f.attributes||{},c=Number.parseInt(a.ALERTA_DESCRIPCION,10);
+      const st=Number.isNaN(c)?S[2]:(S[c]||S[2]);
+      return {name:String(a.ZONA_VERDE||'—').trim(),code:Number.isNaN(c)?null:c,open:st.open,tag:st.tag||null,
               schedule:clean(a.HORARIO_INCIDENCIA),notes:clean(a.OBSERVACIONES)};
     });
-    at=Date.now();
-    $('#alertbar').classList.remove('on');
-    paint();
+    at=Date.now();failed=false;
   }catch(e){
-    const b=$('#alertbar'); b.textContent=T[lang].failed; b.classList.add('on');
-    if(!parks){ $('#headline').textContent=T[lang].failedTitle; $('#detail').textContent='';
-      $('#verdict').style.setProperty('--tone','var(--major)');
-      $('#list').innerHTML=`<p class="placeholder">${esc(T[lang].failed)}</p>`; }
+    failed=true;
   }finally{
-    document.body.classList.remove('busy'); $('#refresh').disabled=false;
+    document.body.classList.remove('busy');$('#refresh').disabled=false;
+    paint();
   }
 }
 
-window.setLang=function(n){
+/* ---------- arrastrar las fichas (ratón) ---------- */
+let drag=null;
+grid.addEventListener('pointerdown',e=>{
+  if(e.pointerType!=='mouse'||e.button!==0||e.target.closest('button,a')) return;
+  const el=e.target.closest('.tile[data-key]');
+  if(el) drag={el,x:e.clientX,y:e.clientY,id:e.pointerId,on:false,last:null,lock:0};
+});
+addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id) return;
+  if(!drag.on){
+    if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6) return;
+    drag.on=true;drag.el.classList.add('dragging');document.documentElement.classList.add('sorting');
+    getSelection()?.removeAllRanges();
+  }
+  /* Mientras las fichas vuelan a su sitio no se decide nada: pasarían por
+     debajo del cursor y se encadenarían cambios que nadie ha pedido. */
+  if(performance.now()<drag.lock) return;
+  const over=document.elementFromPoint(e.clientX,e.clientY)?.closest('.tile[data-key]');
+  if(!over||over===drag.el){drag.last=null;return}
+  if(over===drag.last) return;
+  const after=!!(drag.el.compareDocumentPosition(over)&Node.DOCUMENT_POSITION_FOLLOWING);
+  flip(grid,()=>over[after?'after':'before'](drag.el));
+  drag.last=over;drag.lock=performance.now()+(calmMotion.matches?0:240);
+});
+function drop(){
+  if(!drag) return;
+  const moved=drag.on;
+  drag.el.classList.remove('dragging');document.documentElement.classList.remove('sorting');drag=null;
+  if(!moved) return;
+  /* Lo que se ve manda: los visibles toman el orden de la rejilla y los
+     ocultos conservan su hueco. */
+  const seen=[...grid.querySelectorAll('.tile[data-key]')].map(el=>el.dataset.key);
+  pinOrder();
+  let k=0;prefs.order=prefs.order.map(n=>isHidden(n)?n:seen[k++]);
+  commit();
+}
+addEventListener('pointerup',drop);addEventListener('pointercancel',drop);
+
+/* ---------- eventos ---------- */
+grid.addEventListener('click',e=>{
+  const star=e.target.closest('.star');
+  if(star) toggleFav(star.closest('[data-key]').dataset.key);
+});
+picks.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-role]');if(!b) return;
+  const n=b.closest('li').dataset.key,r=b.dataset.role;
+  if(r==='star') toggleFav(n); else move(n,r==='up'?-1:1);
+});
+picks.addEventListener('change',e=>{
+  if(e.target.matches('input[data-role="vis"]')) toggleHidden(e.target.closest('li').dataset.key);
+});
+function openEditor(){if(!parks||editor.open) return;editor.showModal();paintEditor()}
+$('#open-editor').addEventListener('click',openEditor);
+$('#hero').addEventListener('click',e=>{if(e.target.closest('[data-open-editor]')) openEditor()});
+$('#ed-close').addEventListener('click',()=>editor.close());
+$('#ed-done').addEventListener('click',()=>editor.close());
+$('#ed-reset').addEventListener('click',()=>{prefs={order:[],hidden:[],fav:[]};commit()});
+editor.addEventListener('click',e=>{if(e.target===editor) editor.close()});
+
+$('#refresh').addEventListener('click',load);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&at&&Date.now()-at>5*6e4) load()});
+/* El sello envejece solo, y cada cinco minutos se vuelve a preguntar. */
+setInterval(()=>{if(!document.hidden) paintTools()},30000);
+setInterval(()=>{if(!document.hidden&&!drag) load()},5*6e4);
+
+function setLang(n){
   lang=T[n]?n:'es';
   document.documentElement.lang=lang;
   try{localStorage.setItem('parksLang',lang)}catch(e){}
-  document.querySelectorAll('[data-k]').forEach(el=>{
-    const v=T[lang][el.getAttribute('data-k')];
-    if(typeof v==='string') el.textContent=v;
-  });
-  document.title=lang==='en'?'Madrid parks status':'Estado de los parques de Madrid';
+  const t=T[lang];
+  document.title=t.title;
+  document.querySelectorAll('[data-k]').forEach(el=>{el.textContent=t[el.dataset.k]});
+  document.querySelectorAll('[data-ka]').forEach(el=>{el.setAttribute('aria-label',t[el.dataset.ka])});
+  document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===lang)));
   paint();
-};
+}
+document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));
 
-$('#refresh').addEventListener('click',()=>load());
-document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden&&at&&Date.now()-at>5*6e4) load();
-});
-/* El sello "hace X minutos" envejece solo aunque no se recargue. */
-setInterval(()=>{ if(at&&!document.hidden) $('#stamp').textContent=ago(); },30000);
-
-let saved=null; try{saved=localStorage.getItem('parksLang')}catch(e){}
+let saved=null;try{saved=localStorage.getItem('parksLang')}catch(e){}
 setLang(saved||(navigator.language||'es').slice(0,2));
-$('#lang').value=lang;
 load();
 })();
 </script>
