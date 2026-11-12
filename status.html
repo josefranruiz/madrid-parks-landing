@@ -130,19 +130,18 @@ body.busy .glyph{display:none}
 .park::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tone)}
 .park.calm{padding-top:13px;padding-bottom:13px}
 
-.row{display:flex;align-items:center;gap:12px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--tone);flex:none;
+.row{display:flex;align-items:flex-start;gap:11px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--tone);flex:none;margin-top:7px;
      box-shadow:0 0 0 3.5px color-mix(in srgb,var(--tone) 18%,transparent)}
 .name{font-weight:600;font-size:.98rem;letter-spacing:-.012em;flex:1;min-width:0}
-.state{font-size:.78rem;font-weight:600;color:var(--tone);white-space:nowrap;letter-spacing:.01em}
-.state .sep{color:var(--ink-faint);font-weight:400;margin:0 5px}
-.state .shutlabel{color:var(--shut)}
+.state{font-size:.78rem;font-weight:600;white-space:nowrap;letter-spacing:.01em;flex:none;margin-top:2px}
+.state.is-open{color:var(--open)}
+.state.is-shut{color:var(--shut)}
 
-.note{
-  margin-top:9px;padding-left:20px;font-size:.85rem;color:var(--ink-soft);
-  display:flex;flex-direction:column;gap:2px;
-}
+.note{margin-top:7px;padding-left:19px;font-size:.85rem;color:var(--ink-soft)}
 .note b{font-weight:600;color:var(--ink)}
+.note .tag{font-weight:600;color:var(--tone)}
+.note .sep{color:var(--ink-faint);margin:0 6px}
 
 .placeholder{color:var(--ink-faint);text-align:center;padding:56px 20px;font-size:.95rem}
 
@@ -305,24 +304,29 @@ function paint(){
 
   const card=(p,quiet)=>{
     const code=CODE[p.code];
-    const state=p.open===false
-      ? `<span class="shutlabel">${esc(t.closed)}</span>${code?`<span class="sep">·</span>${esc(t[code])}`:''}`
-      : `${esc(t.open)}${code?`<span class="sep">·</span>${esc(t[code])}`:''}`;
+    const shut=p.open===false;
 
-    /* Nada de recuadros: una línea discreta, y solo si hay algo real.
-       La fecha llega todos los días aunque no pase nada, así que no cuenta. */
+    /* A la derecha, solo la respuesta: abierto o cerrado. Una columna binaria
+       se recorre con la vista; metiendo ahí también el código, los nombres
+       largos se quedaban sin sitio y la fila se descuadraba. */
+    const state=`<span class="state ${shut?'is-shut':'is-open'}">${esc(shut?t.closed:t.open)}</span>`;
+
+    /* El código y su explicación van juntos abajo, en una línea discreta.
+       Nada de recuadros. La fecha llega todos los días aunque no pase nada,
+       así que por sí sola no cuenta como incidencia. */
     const bits=[];
+    if(code) bits.push(`<span class="tag">${esc(t[code])}</span>`);
     if(p.schedule) bits.push(`<span><b>${esc(t.restricted)}:</b> ${esc(p.schedule)}</span>`);
     if(p.notes) bits.push(`<span>${esc(p.notes)}</span>`);
-    if(p.open===false&&!bits.length) bits.push(`<span>${esc(t.closedByCity)}</span>`);
+    if(shut&&!p.schedule&&!p.notes) bits.push(`<span>${esc(t.closedByCity)}</span>`);
 
     return `<article class="park${quiet?' calm':''}" style="--tone:${p.tone}">
       <div class="row">
         <span class="dot" aria-hidden="true"></span>
         <span class="name">${esc(p.name)}</span>
-        <span class="state">${state}</span>
+        ${state}
       </div>
-      ${bits.length?`<div class="note">${bits.join('')}</div>`:''}
+      ${bits.length?`<div class="note"><span class="line">${bits.join('<span class="sep">·</span>')}</span></div>`:''}
     </article>`;
   };
 
