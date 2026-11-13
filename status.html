@@ -12,8 +12,6 @@
 <meta property="og:description" content="¿Está abierto el Retiro ahora mismo? El parte del Ayuntamiento, de un vistazo.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E8A57' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 19C5 11 10 6 19 5c0 9-5 14-13 14'/%3E%3Cpath d='M5 19c2-5 5-8 9-10'/%3E%3C/svg%3E">
 <style>
-@property --tone{syntax:'<color>';inherits:true;initial-value:#197A4C}
-
 *,*::before,*::after{box-sizing:border-box}
 *{margin:0;padding:0}
 [hidden]{display:none!important}
@@ -76,13 +74,14 @@ button:disabled{cursor:default}
 svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* ---------- lienzo ---------- */
-.page{position:relative;--tone:var(--open);transition:--tone .9s ease;overflow:clip}
-/* El halo toma el color del parte: verde si todo va bien, rojo si hay cierre. */
+.page{position:relative;overflow:clip}
+/* Un lavado verde muy leve arriba, para que el papel no quede plano. Es fijo:
+   no cambia con el estado, porque eso ya lo dicen las fichas. */
 .aura{
-  position:absolute;inset:0 0 auto;height:640px;pointer-events:none;
+  position:absolute;inset:0 0 auto;height:520px;pointer-events:none;
   background:
-    radial-gradient(60% 78% at 6% 0%,color-mix(in srgb,var(--tone) 19%,transparent),transparent 72%),
-    radial-gradient(42% 60% at 100% 0%,color-mix(in srgb,var(--tone) 9%,transparent),transparent 70%);
+    radial-gradient(60% 78% at 6% 0%,color-mix(in srgb,var(--open) 13%,transparent),transparent 72%),
+    radial-gradient(42% 60% at 100% 0%,color-mix(in srgb,var(--open) 6%,transparent),transparent 70%);
 }
 .wrap{position:relative;max-width:1140px;margin:0 auto;padding:18px clamp(18px,5vw,44px) 56px}
 
@@ -96,26 +95,14 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1)}
 @media (prefers-color-scheme:dark){.seg button[aria-pressed="true"]{background:color-mix(in srgb,var(--ink) 16%,var(--surface))}}
 
-/* ---------- portada: la respuesta ---------- */
-.hero{padding:clamp(30px,6vw,72px) 0 clamp(22px,3.4vw,36px)}
-.eyebrow{display:flex;align-items:center;gap:11px;font-size:.74rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2)}
-.pulse{position:relative;width:8px;height:8px;border-radius:50%;background:var(--tone);flex:none}
-.pulse::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--tone);animation:pulse 2.6s var(--ease) infinite}
-@keyframes pulse{0%{transform:scale(1);opacity:.55}70%,100%{transform:scale(3.2);opacity:0}}
-
-h1{
-  font-family:var(--serif);font-weight:400;
-  font-size:clamp(2rem,4.6vw,3.1rem);line-height:1.08;letter-spacing:-.018em;
-  margin-top:12px;text-wrap:balance;
-}
-h1 em{font-style:italic;color:var(--tone)}
-.sub{margin-top:12px;font-size:clamp(1rem,1.6vw,1.14rem);color:var(--ink-2);max-width:54ch;text-wrap:pretty}
-.sub:empty{display:none}
+/* La página no tiene portada: lo primero que se ve son los parques. El título
+   y el resumen existen solo para lectores de pantalla y para la pestaña. */
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .link{color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;border-radius:4px}
+.empty{padding:28px 0 8px;font-size:1.05rem;color:var(--ink-2)}
 
 /* ---------- barra de herramientas ---------- */
-.tools{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);margin-bottom:14px}
+.tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:clamp(14px,3vw,30px) 0 14px}
 .refresh{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 13px 0 9px;margin-left:-9px;border-radius:999px;color:var(--ink-2);font-size:.85rem;transition:background-color .15s,color .15s}
 .refresh:hover:not(:disabled){background:color-mix(in srgb,var(--ink) 6%,transparent);color:var(--ink)}
 .refresh.stale{color:var(--major)}
@@ -240,7 +227,6 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
 .primary:hover{opacity:.86}
 
 @media (max-width:560px){
-  .hero{padding-top:28px}
   footer{grid-template-columns:1fr}
   footer nav{flex-direction:row;flex-wrap:wrap;gap:6px 18px;text-align:left}
   dialog{margin:auto 0 0;width:100%;max-width:100%;max-height:88dvh;border-radius:22px 22px 0 0}
@@ -281,12 +267,8 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
       </div>
     </header>
 
-    <section class="hero" id="hero">
-      <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Madrid</p>
-      <h1 id="headline"></h1>
-      <p class="sub" id="sub"></p>
-      <p class="sr" id="summary" aria-live="polite"></p>
-    </section>
+    <h1 class="sr" data-k="title">Estado de los parques de Madrid</h1>
+    <p class="sr" id="summary" aria-live="polite"></p>
 
     <div class="tools">
       <button type="button" class="refresh" id="refresh"><svg class="i"><use href="#i-refresh"/></svg><span id="stamp">Actualizar</span></button>
@@ -297,6 +279,7 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
     </div>
 
     <p class="alertbar" id="alertbar" role="status" hidden></p>
+    <p class="empty" id="empty" hidden></p>
 
     <main class="grid" id="grid"></main>
 
@@ -434,7 +417,7 @@ const icon=n=>`<svg class="i" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const EASE='cubic-bezier(.2,.7,.2,1)';
 const calmMotion=matchMedia('(prefers-reduced-motion: reduce)');
 
-const page=$('#page'), grid=$('#grid'), picks=$('#picks'), editor=$('#editor');
+const grid=$('#grid'), picks=$('#picks'), editor=$('#editor');
 let lang='es', parks=null, at=null, failed=false;
 
 /* ---------- preferencias: qué parques, en qué orden, cuáles fijados ---------- */
@@ -494,13 +477,6 @@ function ago(){
   const t=T[lang],m=Math.round((Date.now()-at)/6e4);
   if(m<1) return t.now; if(m<60) return t.mins(m);
   return t.hours(Math.round(m/60));
-}
-/* La cabecera es la fecha en Madrid: dice a qué día se refiere «abre mañana»
-   y vale igual con un parque que con nueve. */
-function dateHead(){
-  const f=o=>new Intl.DateTimeFormat(lang==='en'?'en-GB':'es-ES',{...o,timeZone:'Europe/Madrid'}).format(new Date());
-  const day=f({weekday:'long'});
-  return `${esc(day[0].toUpperCase()+day.slice(1))}, <em>${esc(f({day:'numeric',month:'long'}))}</em>`;
 }
 /* ---------- horario ---------- */
 /* Las mismas reglas que la app (src/utils/parkUtils.ts). m: mes 1-12, d: día,
@@ -643,51 +619,39 @@ async function toggleNotify(){
 }
 
 /* ---------- pintar ---------- */
-function paintHero(){
-  const t=T[lang],head=$('#headline'),sub=$('#sub'),sum=$('#summary');
+/* El resumen no se pinta: lo que diría un titular lo dicen ya las fichas. Se
+   queda donde no hay fichas al lado: en la pestaña —anclada, se lee sin
+   abrirla— y para quien usa lector de pantalla. */
+function paintSummary(){
+  const t=T[lang],sum=$('#summary'),empty=$('#empty');
   const plain=x=>x.replace(/<[^>]+>/g,'');
-  head.innerHTML=dateHead();
-  if(!parks){
-    /* Si la consulta falla ya lo cuenta la franja de aviso de debajo. */
-    sub.textContent=failed?'':t.loading;sum.textContent='';
-    page.style.setProperty('--tone',failed?'var(--major)':'var(--none)');
-    document.title=t.title;
-    return;
-  }
+  if(!parks){sum.textContent=failed?'':t.loading;empty.hidden=true;document.title=t.title;return}
   const c=madridNow(),v=visible().map(p=>({p,l:look(p,c)}));
   const city=v.filter(x=>x.l.state==='city'),rest=v.filter(x=>x.l.state==='hours');
   const open=v.filter(x=>x.l.state==='open'||x.l.state==='none');
   const warn=open.filter(x=>x.p.code!==1);
-  let h,s,tone,tab='';
+  let h,s='',tab='';
   if(!v.length){
-    h=t.noneHead;s=`<button type="button" class="link" data-open-editor>${esc(t.noneSub)}</button>`;tone='var(--none)';
+    h=t.noneHead;s=`<button type="button" class="link" data-open-editor>${esc(t.noneSub)}</button>`;
   }else if(v.length===1){
     const {p,l}=v[0],k=l.state==='open'?(p.code===1?'open':'warn'):l.state;
-    h=t.one[k];s='';
-    tone={open:'var(--open)',warn:p.tag==='major'?'var(--major)':'var(--warn-hi)',city:'var(--shut)',hours:'var(--none)',none:'var(--none)'}[k];
+    h=t.one[k];
     tab=`${p.name}: ${plain(h).replace(/\.$/,'').toLowerCase()}`;
   }else if(city.length){
-    h=t.shutHead(city.length);s=t.shutSub(city.map(x=>esc(x.p.name)).join(', '),rest.length,warn.length);tone='var(--shut)';
+    h=t.shutHead(city.length);s=t.shutSub(city.map(x=>esc(x.p.name)).join(', '),rest.length,warn.length);
   }else if(rest.length===v.length){
     const first=rest.filter(x=>x.l.next).sort((a,b)=>a.l.next.off-b.l.next.off||mins(a.l.next.time)-mins(b.l.next.time))[0];
-    h=t.allHours;s=first?t.firstOpen(esc(first.p.name),esc(whenText(first.l.next))):'';tone='var(--none)';
+    h=t.allHours;s=first?t.firstOpen(esc(first.p.name),esc(whenText(first.l.next))):'';
   }else if(rest.length){
-    /* Un cierre por horario es rutina (el Capricho solo abre en fin de semana):
-       el titular habla de lo abierto y la rutina baja a la línea de debajo. */
     h=t.mixHead(open.length,warn.length);s=t.mixSub(rest.map(x=>esc(x.p.name)).join(', '),rest.length);
-    tone=warn.length?'var(--warn-hi)':'var(--open)';
   }else if(warn.length){
-    h=t.warnHead(warn.length);s=esc(t.warnSub(warn.length));tone='var(--warn-hi)';
+    h=t.warnHead(warn.length);s=esc(t.warnSub(warn.length));
   }else{
-    h=t.allClear;s=esc(t.allClearSub(v.length,v.length===parks.length));tone='var(--open)';
+    h=t.allClear;s=esc(t.allClearSub(v.length,v.length===parks.length));
   }
-  /* El resumen ya no se pinta: lo que antes decía el titular lo dicen las
-     fichas, y con un solo parque lo repetía. Se queda donde no hay fichas al
-     lado: en la pestaña —anclada, se lee sin abrirla— y para quien usa lector
-     de pantalla. En la página solo se habla cuando no hay ninguna ficha. */
-  sub.innerHTML=v.length?'':`${plain(h)} ${s}`;
+  /* En la página solo se habla cuando no hay ninguna ficha que lo haga. */
+  empty.hidden=v.length>0;empty.innerHTML=v.length?'':`${plain(h)} ${s}`;
   sum.textContent=tab||plain(`${h} ${s}`);
-  page.style.setProperty('--tone',tone);
   document.title=(tab||plain(h).replace(/\.$/,''))+' · Madrid Parks';
 }
 
@@ -761,7 +725,7 @@ function paintEditor(){
 /* Lo que cambia solo con el reloj: quién abre, quién cierra y a qué hora. */
 const stateOfPlay=()=>{if(!parks) return '';const c=madridNow();return `${c.y}-${c.m}-${c.d}|`+visible().map(p=>JSON.stringify(look(p,c))).join('|')};
 let lastPlay='';
-function paint(){paintHero();paintGrid();paintTools();paintEditor();lastPlay=stateOfPlay()}
+function paint(){paintSummary();paintGrid();paintTools();paintEditor();lastPlay=stateOfPlay()}
 
 /* ---------- datos ---------- */
 async function load(){
@@ -858,7 +822,7 @@ function openEditor(){
   if(!parks||editor.open) return;editor.showModal();paintEditor();
 }
 $('#open-editor').addEventListener('click',openEditor);
-$('#hero').addEventListener('click',e=>{if(e.target.closest('[data-open-editor]')) openEditor()});
+$('#empty').addEventListener('click',e=>{if(e.target.closest('[data-open-editor]')) openEditor()});
 $('#ed-close').addEventListener('click',()=>editor.close());
 $('#ed-done').addEventListener('click',()=>editor.close());
 $('#ed-reset').addEventListener('click',()=>{prefs={order:[],hidden:[],fav:[]};commit()});
