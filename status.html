@@ -368,9 +368,9 @@ const T={
   mixHead:(o,w)=>`${o===1?'Uno abierto':o+' abiertos'}, <em>${w?'con '+(w===1?'un aviso':w+' avisos'):'sin incidencias'}.</em>`,
   mixSub:(names,h)=>h<=3?`Cerrado por horario: <b>${names}</b>.`:`Los otros ${h} están cerrados por horario.`,
   one:{open:'<em>Abierto.</em>',warn:'Abierto, <em>con un aviso.</em>',city:'<em>Cerrado.</em>',hours:'Cerrado <em>por horario.</em>',none:'<em>Sin datos.</em>'},
-  oneSub:name=>`Estás viendo solo <b>${name}</b>.`,
+  oneHead:'El parte <em>de hoy.</em>',
   noneHead:'Ningún parque <em>elegido.</em>',noneSub:'Elige qué parques quieres ver',
-  closes:time=>`Cierra ${alas(time)}`,opens:when=>`Abre ${when}`,
+  closes:time=>time==='00:00'?'Cierra a medianoche':`Cierra ${alas(time)}`,opens:when=>`Abre ${when}`,
   when:(off,time,day)=>off===0?alas(time):off===1?`mañana ${alas(time)}`:`el ${day} ${alas(time)}`,
   window:'Horario del aviso',closedByCity:'Cerrado por el Ayuntamiento',
   refresh:'Actualizar',now:'Actualizado ahora',mins:n=>`Actualizado hace ${n} min`,hours:n=>`Actualizado hace ${n} h`,
@@ -406,9 +406,9 @@ const T={
   mixHead:(o,w)=>`${o} open, <em>${w?'with '+(w===1?'one notice':w+' notices'):'nothing reported'}.</em>`,
   mixSub:(names,h)=>h<=3?`Closed outside opening hours: <b>${names}</b>.`:`The other ${h} are closed outside opening hours.`,
   one:{open:'<em>Open.</em>',warn:'Open, <em>with a notice.</em>',city:'<em>Closed.</em>',hours:'Closed, <em>outside opening hours.</em>',none:'<em>No data.</em>'},
-  oneSub:name=>`Showing only <b>${name}</b>.`,
+  oneHead:'Today’s <em>report.</em>',
   noneHead:'No parks <em>selected.</em>',noneSub:'Choose the parks you want to see',
-  closes:time=>`Closes at ${time}`,opens:when=>`Opens ${when}`,
+  closes:time=>time==='00:00'?'Closes at midnight':`Closes at ${time}`,opens:when=>`Opens ${when}`,
   when:(off,time,day)=>off===0?`at ${time}`:off===1?`tomorrow at ${time}`:`on ${day} at ${time}`,
   window:'Notice in effect',closedByCity:'Closed by the city council',
   refresh:'Refresh',now:'Updated just now',mins:n=>`Updated ${n} min ago`,hours:n=>`Updated ${n} h ago`,
@@ -656,16 +656,17 @@ function paintHero(){
   const city=v.filter(x=>x.l.state==='city'),rest=v.filter(x=>x.l.state==='hours');
   const open=v.filter(x=>x.l.state==='open'||x.l.state==='none');
   const warn=open.filter(x=>x.p.code!==1);
-  let h,s,tone;
+  let h,s,tone,tab='';
   if(!v.length){
     h=t.noneHead;s=`<button type="button" class="link" data-open-editor>${esc(t.noneSub)}</button>`;tone='var(--none)';
   }else if(v.length===1){
-    /* Con un parque el titular sigue siendo el resumen y la ficha, el detalle:
-       misma página, solo que más corta. */
+    /* Con un solo parque no hay nada que resumir: lo que diga el titular lo
+       repite la ficha de debajo. El titular se queda en título y la ficha da
+       la respuesta. El tono sí acompaña al estado. */
     const {p,l}=v[0],k=l.state==='open'?(p.code===1?'open':'warn'):l.state;
-    h=t.one[k];
-    s=t.oneSub(esc(p.name));
+    h=t.oneHead;s='';
     tone={open:'var(--open)',warn:p.tag==='major'?'var(--major)':'var(--warn-hi)',city:'var(--shut)',hours:'var(--none)',none:'var(--none)'}[k];
+    tab=`${p.name}: ${t.one[k].replace(/<[^>]+>/g,'').replace(/\.$/,'').toLowerCase()}`;
   }else if(city.length){
     h=t.shutHead(city.length);s=t.shutSub(city.map(x=>esc(x.p.name)).join(', '),rest.length,warn.length);tone='var(--shut)';
   }else if(rest.length===v.length){
@@ -684,8 +685,7 @@ function paintHero(){
   head.innerHTML=h;sub.innerHTML=s;
   page.style.setProperty('--tone',tone);
   /* La pestaña también responde: anclada, se lee sin abrirla. */
-  const plain=head.textContent.replace(/\.$/,'');
-  document.title=(v.length===1?`${v[0].p.name}: ${plain.toLowerCase()}`:plain)+' · Madrid Parks';
+  document.title=(tab||head.textContent.replace(/\.$/,''))+' · Madrid Parks';
 }
 
 function tile(p,c){
