@@ -97,7 +97,7 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 @media (prefers-color-scheme:dark){.seg button[aria-pressed="true"]{background:color-mix(in srgb,var(--ink) 16%,var(--surface))}}
 
 /* ---------- portada: la respuesta ---------- */
-.hero{padding:clamp(40px,9vw,104px) 0 clamp(30px,5vw,52px)}
+.hero{padding:clamp(30px,6vw,72px) 0 clamp(22px,3.4vw,36px)}
 .eyebrow{display:flex;align-items:center;gap:11px;font-size:.74rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2)}
 .pulse{position:relative;width:8px;height:8px;border-radius:50%;background:var(--tone);flex:none}
 .pulse::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--tone);animation:pulse 2.6s var(--ease) infinite}
@@ -105,12 +105,13 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 
 h1{
   font-family:var(--serif);font-weight:400;
-  font-size:clamp(2.5rem,7.4vw,5.25rem);line-height:1.02;letter-spacing:-.022em;
-  margin-top:18px;max-width:17ch;text-wrap:balance;
+  font-size:clamp(2rem,4.6vw,3.1rem);line-height:1.08;letter-spacing:-.018em;
+  margin-top:12px;text-wrap:balance;
 }
 h1 em{font-style:italic;color:var(--tone)}
-.sub{margin-top:18px;font-size:clamp(1rem,1.6vw,1.14rem);color:var(--ink-2);max-width:54ch;text-wrap:pretty}
-.sub b{font-weight:600;color:var(--ink)}
+.sub{margin-top:12px;font-size:clamp(1rem,1.6vw,1.14rem);color:var(--ink-2);max-width:54ch;text-wrap:pretty}
+.sub:empty{display:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .link{color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;border-radius:4px}
 
 /* ---------- barra de herramientas ---------- */
@@ -239,7 +240,7 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
 .primary:hover{opacity:.86}
 
 @media (max-width:560px){
-  .hero{padding-top:36px}
+  .hero{padding-top:28px}
   footer{grid-template-columns:1fr}
   footer nav{flex-direction:row;flex-wrap:wrap;gap:6px 18px;text-align:left}
   dialog{margin:auto 0 0;width:100%;max-width:100%;max-height:88dvh;border-radius:22px 22px 0 0}
@@ -280,10 +281,11 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
       </div>
     </header>
 
-    <section class="hero" id="hero" aria-live="polite">
-      <p class="eyebrow"><span class="pulse" aria-hidden="true"></span><span id="dateline">Madrid</span></p>
-      <h1 id="headline">Consultando el parte…</h1>
+    <section class="hero" id="hero">
+      <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Madrid</p>
+      <h1 id="headline"></h1>
       <p class="sub" id="sub"></p>
+      <p class="sr" id="summary" aria-live="polite"></p>
     </section>
 
     <div class="tools">
@@ -368,14 +370,12 @@ const T={
   mixHead:(o,w)=>`${o===1?'Uno abierto':o+' abiertos'}, <em>${w?'con '+(w===1?'un aviso':w+' avisos'):'sin incidencias'}.</em>`,
   mixSub:(names,h)=>h<=3?`Cerrado por horario: <b>${names}</b>.`:`Los otros ${h} están cerrados por horario.`,
   one:{open:'<em>Abierto.</em>',warn:'Abierto, <em>con un aviso.</em>',city:'<em>Cerrado.</em>',hours:'Cerrado <em>por horario.</em>',none:'<em>Sin datos.</em>'},
-  oneHead:'El parte <em>de hoy.</em>',
   noneHead:'Ningún parque <em>elegido.</em>',noneSub:'Elige qué parques quieres ver',
   closes:time=>time==='00:00'?'Cierra a medianoche':`Cierra ${alas(time)}`,opens:when=>`Abre ${when}`,
   when:(off,time,day)=>off===0?alas(time):off===1?`mañana ${alas(time)}`:`el ${day} ${alas(time)}`,
   window:'Horario del aviso',closedByCity:'Cerrado por el Ayuntamiento',
   refresh:'Actualizar',now:'Actualizado ahora',mins:n=>`Actualizado hace ${n} min`,hours:n=>`Actualizado hace ${n} h`,
   failed:'No se ha podido consultar al Ayuntamiento. Inténtalo de nuevo en un momento.',
-  failedHead:'Sin respuesta <em>del Ayuntamiento.</em>',
   fav:'Fijar arriba como favorito',unfav:'Quitar de favoritos',up:'Subir',down:'Bajar',
   share:'Copiar el enlace de este parque',copied:'Enlace copiado',
   bell:'Avisarme si cambia el estado',bellOn:'Avisos activados. Pulsa para desactivarlos',
@@ -406,14 +406,12 @@ const T={
   mixHead:(o,w)=>`${o} open, <em>${w?'with '+(w===1?'one notice':w+' notices'):'nothing reported'}.</em>`,
   mixSub:(names,h)=>h<=3?`Closed outside opening hours: <b>${names}</b>.`:`The other ${h} are closed outside opening hours.`,
   one:{open:'<em>Open.</em>',warn:'Open, <em>with a notice.</em>',city:'<em>Closed.</em>',hours:'Closed, <em>outside opening hours.</em>',none:'<em>No data.</em>'},
-  oneHead:'Today’s <em>report.</em>',
   noneHead:'No parks <em>selected.</em>',noneSub:'Choose the parks you want to see',
   closes:time=>time==='00:00'?'Closes at midnight':`Closes at ${time}`,opens:when=>`Opens ${when}`,
   when:(off,time,day)=>off===0?`at ${time}`:off===1?`tomorrow at ${time}`:`on ${day} at ${time}`,
   window:'Notice in effect',closedByCity:'Closed by the city council',
   refresh:'Refresh',now:'Updated just now',mins:n=>`Updated ${n} min ago`,hours:n=>`Updated ${n} h ago`,
   failed:'Could not reach the city council. Try again in a moment.',
-  failedHead:'No answer <em>from the city council.</em>',
   fav:'Pin to the top as a favourite',unfav:'Remove from favourites',up:'Move up',down:'Move down',
   share:'Copy the link to this park',copied:'Link copied',
   bell:'Notify me when the status changes',bellOn:'Notifications on. Click to turn them off',
@@ -497,9 +495,12 @@ function ago(){
   if(m<1) return t.now; if(m<60) return t.mins(m);
   return t.hours(Math.round(m/60));
 }
-function dateline(){
-  const d=new Intl.DateTimeFormat(lang==='en'?'en-GB':'es-ES',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Madrid'}).format(new Date());
-  return `Madrid · ${d}`;
+/* La cabecera es la fecha en Madrid: dice a qué día se refiere «abre mañana»
+   y vale igual con un parque que con nueve. */
+function dateHead(){
+  const f=o=>new Intl.DateTimeFormat(lang==='en'?'en-GB':'es-ES',{...o,timeZone:'Europe/Madrid'}).format(new Date());
+  const day=f({weekday:'long'});
+  return `${esc(day[0].toUpperCase()+day.slice(1))}, <em>${esc(f({day:'numeric',month:'long'}))}</em>`;
 }
 /* ---------- horario ---------- */
 /* Las mismas reglas que la app (src/utils/parkUtils.ts). m: mes 1-12, d: día,
@@ -643,11 +644,12 @@ async function toggleNotify(){
 
 /* ---------- pintar ---------- */
 function paintHero(){
-  const t=T[lang],head=$('#headline'),sub=$('#sub');
-  $('#dateline').textContent=dateline();
+  const t=T[lang],head=$('#headline'),sub=$('#sub'),sum=$('#summary');
+  const plain=x=>x.replace(/<[^>]+>/g,'');
+  head.innerHTML=dateHead();
   if(!parks){
-    head.innerHTML=failed?t.failedHead:esc(t.loading);
-    sub.textContent='';
+    /* Si la consulta falla ya lo cuenta la franja de aviso de debajo. */
+    sub.textContent=failed?'':t.loading;sum.textContent='';
     page.style.setProperty('--tone',failed?'var(--major)':'var(--none)');
     document.title=t.title;
     return;
@@ -660,13 +662,10 @@ function paintHero(){
   if(!v.length){
     h=t.noneHead;s=`<button type="button" class="link" data-open-editor>${esc(t.noneSub)}</button>`;tone='var(--none)';
   }else if(v.length===1){
-    /* Con un solo parque no hay nada que resumir: lo que diga el titular lo
-       repite la ficha de debajo. El titular se queda en título y la ficha da
-       la respuesta. El tono sí acompaña al estado. */
     const {p,l}=v[0],k=l.state==='open'?(p.code===1?'open':'warn'):l.state;
-    h=t.oneHead;s='';
+    h=t.one[k];s='';
     tone={open:'var(--open)',warn:p.tag==='major'?'var(--major)':'var(--warn-hi)',city:'var(--shut)',hours:'var(--none)',none:'var(--none)'}[k];
-    tab=`${p.name}: ${t.one[k].replace(/<[^>]+>/g,'').replace(/\.$/,'').toLowerCase()}`;
+    tab=`${p.name}: ${plain(h).replace(/\.$/,'').toLowerCase()}`;
   }else if(city.length){
     h=t.shutHead(city.length);s=t.shutSub(city.map(x=>esc(x.p.name)).join(', '),rest.length,warn.length);tone='var(--shut)';
   }else if(rest.length===v.length){
@@ -682,10 +681,14 @@ function paintHero(){
   }else{
     h=t.allClear;s=esc(t.allClearSub(v.length,v.length===parks.length));tone='var(--open)';
   }
-  head.innerHTML=h;sub.innerHTML=s;
+  /* El resumen ya no se pinta: lo que antes decía el titular lo dicen las
+     fichas, y con un solo parque lo repetía. Se queda donde no hay fichas al
+     lado: en la pestaña —anclada, se lee sin abrirla— y para quien usa lector
+     de pantalla. En la página solo se habla cuando no hay ninguna ficha. */
+  sub.innerHTML=v.length?'':`${plain(h)} ${s}`;
+  sum.textContent=tab||plain(`${h} ${s}`);
   page.style.setProperty('--tone',tone);
-  /* La pestaña también responde: anclada, se lee sin abrirla. */
-  document.title=(tab||head.textContent.replace(/\.$/,''))+' · Madrid Parks';
+  document.title=(tab||plain(h).replace(/\.$/,''))+' · Madrid Parks';
 }
 
 function tile(p,c){
@@ -756,7 +759,7 @@ function paintEditor(){
 }
 
 /* Lo que cambia solo con el reloj: quién abre, quién cierra y a qué hora. */
-const stateOfPlay=()=>{if(!parks) return '';const c=madridNow();return visible().map(p=>JSON.stringify(look(p,c))).join('|')};
+const stateOfPlay=()=>{if(!parks) return '';const c=madridNow();return `${c.y}-${c.m}-${c.d}|`+visible().map(p=>JSON.stringify(look(p,c))).join('|')};
 let lastPlay='';
 function paint(){paintHero();paintGrid();paintTools();paintEditor();lastPlay=stateOfPlay()}
 
