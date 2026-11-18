@@ -140,6 +140,13 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .tile.rest{--tone:var(--none);background:color-mix(in srgb,var(--surface) 45%,var(--bg))}
 .tile.rest .state i{width:10px;height:10px;margin:0 2px;background:transparent;box-shadow:inset 0 0 0 2px currentColor}
 .tile.major{--tag:var(--major)}
+/* El 2 es la categoría más leve: el Ayuntamiento lo pinta en azul, aparte de
+   la escalera amarillo/naranja/rojo. Aquí no hay azul en la paleta, así que
+   se queda en gris: es la misma idea, "aviso menor, no es una alerta". */
+.tile.info{--tag:var(--none)}
+/* El 6 es alerta roja —más grave que el 4— pero sin cierre confirmado: el
+   punto se queda verde (sigue abierto) y solo la pastilla sube al rojo. */
+.tile.severe{--tag:var(--shut)}
 /* Con el orden en manos del usuario, un cierre ya no sube solo: lo carga el color. */
 .tile.shut{--tone:var(--shut);--tag:var(--shut);background:color-mix(in srgb,var(--shut) 8%,var(--surface));border-color:color-mix(in srgb,var(--shut) 36%,var(--line))}
 .tile-top{display:flex;align-items:center;justify-content:space-between;min-height:32px}
@@ -323,23 +330,45 @@ dialog::backdrop{background:rgba(12,18,15,.42);backdrop-filter:blur(3px);-webkit
 const API='https://sigma.madrid.es/hosted/rest/services/MEDIO_AMBIENTE/ALERTAS_PARQUES/MapServer/0/query'
   +'?f=json&where=1%3D1&outFields=*&returnGeometry=false';
 
-/* Mismo mapa que STATUS_MAPPING en la app. open: ¿puedo entrar?
-   tag: la palabra del código, solo cuando añade algo a "abierto/cerrado". */
+/* El significado real de cada código no estaba en ningún sitio visible: se
+   adivinaba por el nombre del campo (ALERTA_DESCRIPCION) y por cómo se
+   comportaba en la práctica. El 18/11/2026 apareció el código 7 en cinco
+   parques y la página los daba por "Sin datos", así que fuimos a buscar la
+   leyenda oficial: la trae el propio servicio, en el renderer de la capa
+   (MapServer/0?f=json → drawingInfo.renderer.uniqueValueGroups). Dice:
+     1 Abierto según horario habitual
+     2 Hay incidencias que afectan a la utilización del parque
+     3 Previsión de alerta amarilla (restricción de zonas en el horario dado)
+     4 Previsión de alerta naranja (más zonas, eventos suspendidos, se
+       recomienda no permanecer)
+     5 Previsión de alerta roja; CONLLEVARÁ el cierre en el horario dado
+     6 Previsión de alerta roja; restricciones de zonas y eventos (no dice
+       cierre)
+     7 Cerrado; conllevará el cierre durante el periodo indicado
+   Antes de esto el 6 se trataba como cierre y el 7 no se reconocía (caía en
+   "Sin datos"): un parque con el 6 se daba por cerrado sin estarlo, y uno con
+   el 7 —el único código que dice "Cerrado" sin rodeos— no se distinguía de un
+   fallo de lectura. El 0 no aparece en la leyenda; se mantiene como cierre
+   porque así estaba y no hay datos para decidir lo contrario.
+   open: ¿puedo entrar? tag: la palabra del código, solo cuando añade algo a
+   "abierto/cerrado". */
 const S={
  0:{open:false},
  1:{open:true},
- 2:{open:null},
+ 2:{open:true, tag:'incident'},
  3:{open:true, tag:'warning'},
  4:{open:true, tag:'major'},
  5:{open:false,tag:'alert'},
- 6:{open:false}
+ 6:{open:true, tag:'severe'},
+ 7:{open:false,tag:'alert'}
 };
+const TAGCLS={major:'major',severe:'severe',incident:'info'};
 
 const alas=time=>(/^0?1:/.test(time)?'a la ':'a las ')+time;
 const T={
  es:{title:'Estado de los parques de Madrid',mine:'Mis parques',seeMine:'Ver mis parques',
   open:'Abierto',closed:'Cerrado',nodata:'Sin datos',
-  warning:'Aviso',major:'Incidencia',alert:'Alerta',
+  warning:'Aviso',major:'Riesgo',severe:'Riesgo alto',incident:'Incidencia',alert:'Alerta',
   loading:'Consultando el parte…',
   allClear:'Todo <em>abierto.</em>',
   allClearSub:(n,all)=>all?`Los ${n} parques, sin incidencias.`:`Tus ${n} parques, sin incidencias.`,
@@ -375,7 +404,7 @@ const T={
   home:'Inicio',app:'App para iPhone',privacy:'Privacidad'},
  en:{title:'Madrid parks status',mine:'My parks',seeMine:'See my parks',
   open:'Open',closed:'Closed',nodata:'No data',
-  warning:'Notice',major:'Incident',alert:'Alert',
+  warning:'Notice',major:'Risk',severe:'High risk',incident:'Incident',alert:'Alert',
   loading:'Checking the report…',
   allClear:'All <em>open.</em>',
   allClearSub:(n,all)=>all?`All ${n} parks, nothing reported.`:`Your ${n} parks, nothing reported.`,
@@ -658,7 +687,7 @@ function paintSummary(){
 function tile(p,c){
   const t=T[lang],l=look(p,c),fav=isFav(p.name),note=story(p,l).join('<br>');
   const shut=l.state==='city'||l.state==='hours';
-  const cls=['tile',{city:'shut',hours:'rest',none:'unknown'}[l.state]||'',p.tag==='major'?'major':''].filter(Boolean).join(' ');
+  const cls=['tile',{city:'shut',hours:'rest',none:'unknown'}[l.state]||'',TAGCLS[p.tag]||''].filter(Boolean).join(' ');
   /* La pastilla del aviso solo cuando el parque se puede pisar o lo cierra la ciudad. */
   const pill=p.tag&&l.state!=='hours'?`<span class="pill">${esc(t[p.tag])}</span>`:'';
   return `<article class="${cls}" data-key="${esc(p.name)}">
